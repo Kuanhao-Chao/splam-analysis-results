@@ -13,7 +13,7 @@ from pyfaidx import Fasta
 #from itertools import groupby
 
 
-# use the score file as the input file, then check with the original GRCh28.p14 fasta file for the donor and acceptor dimers
+# use the score file as the input file, then check with the original GRCh38.p14 fasta file for the donor and acceptor dimers
 # cross-reference with the INPUT.fa file to see why some of the entries get deleted -> write those to a new file?
 # if you set first line to track_name=junctions, you can visualize better using igv
 

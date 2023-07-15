@@ -10,7 +10,7 @@ def run(db_name):
     output_folder = './1_output/'
     input_folder = '../data/'
     input_filename = input_folder + db_name + '.gff'
-    db_filename = output_folder + 'databases/' + db_name + '.db'
+    db_filename = input_folder + 'databases/' + db_name + '.db'
     output_filename = output_folder + db_name + '_introns.bed'
 
     # create database
