@@ -76,9 +76,10 @@ def main(argv):
 
     while pidx < len(all_lines):
         if pidx == BATCH_SIZE:
-            exit()    
+            exit()
         if pidx % 2 == 0:
             chr, start, end, strand = all_lines[pidx].split(";")
+            chr = chr[1:]
             name_fw.write(' '.join([chr, start, end, strand])+"\n")
             pass
         elif pidx % 2 == 1:

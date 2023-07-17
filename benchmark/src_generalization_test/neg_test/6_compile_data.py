@@ -10,21 +10,25 @@ def run_all(db_name):
     types = ['noN', 'N']
     versions = [1, 2, 3, 4, 5]
 
+    print('AGGREGATING SPLAM DATA...')
     splam_aggregator(db_name)
+    print('SPLAM DONE.')
 
+    print('AGGREGATING SPLICEAI DATA...')
     for type, version in itertools.product(types, versions):
         spliceai_aggregator(type, version, db_name)
+    print('SPLICEAI DONE.')
 
+    print('COMBINING...')
     for type in types:
         combine(type, db_name)
+    print('COMBINE DONE.')
 
 
 #######################
 # RUN SPLAM PORTION
 #######################
 def splam_aggregator(db_name):
-
-    print('AGGREGATING SPLAM DATA...')
 
     # collect the data to be aggregated from multiple sources
     splam_score_file = f'./4_output/{db_name}/score.bed'
@@ -35,8 +39,6 @@ def splam_aggregator(db_name):
     # make csv file if it does not exist, write to pd dataframe
     if not os.path.exists(output_file):
         collect_splam(splam_score_file, db_name, output_file)
-
-    print('SPLAM DONE.')
 
 '''Collect the Splam scores into a single dataframe'''
 def collect_splam(score_file, db_name, output_file):
@@ -90,8 +92,6 @@ def collect_splam(score_file, db_name, output_file):
 #######################
 def spliceai_aggregator(TYPE, SPLICEAI_VERSION, db):
 
-    print('AGGREGATING SPLICEAI DATA...')
-
     # define identifiers for this run
     print('*'*170)
     print(f'Parsing for type {TYPE}, SpliceAI version {SPLICEAI_VERSION}, database {db}')
@@ -105,17 +105,16 @@ def spliceai_aggregator(TYPE, SPLICEAI_VERSION, db):
 
     # output filepaths
     id = f'.v{SPLICEAI_VERSION}.{TYPE}.{db}'
-    csv_path = f'./6_output/SpliceAI/spliceai_data{id}.csv'
-    donor_path = f'./6_output/SpliceAI/donor_data{id}.tsv'
-    acceptor_path = f'./6_output/SpliceAI/acceptor_data{id}.tsv'
+    csv_path = f'./6_output/SpliceAI/{db}/spliceai_data{id}.csv'
+    donor_path = f'./6_output/SpliceAI/{db}/donor_data{id}.tsv'
+    acceptor_path = f'./6_output/SpliceAI/{db}/acceptor_data{id}.tsv'
+    os.makedirs(os.path.dirname(csv_path), exist_ok=True)
     
     # collect the full data into a dataframe
     if not os.path.exists(csv_path):
         score_df = collect_spliceai(d_score_file, a_score_file, donor_path, acceptor_path)
         full_df = index_compare(splam_data, name_file, score_df)
         write_df(full_df, csv_path)
-    
-    print('SPLICEAI DONE.')
 
 '''Parse the SpliceAI donor and acceptor files into a single dataframe'''
 def collect_spliceai(d_file, a_file, donor_path, acceptor_path):
@@ -235,7 +234,7 @@ def combine(type, db):
     if not os.path.exists(avg_ofp):
         merge_df = aggregate_data(id)
         agg_df = get_counts(merge_df, id, agg_ofp)
-        avg_df = get_averages(agg_df, avg_ofp)
+        get_averages(agg_df, avg_ofp)
 
 '''Gets the aggregated data from all 5 SpliceAI versions'''
 def aggregate_data(id):
@@ -248,7 +247,7 @@ def aggregate_data(id):
     for version_num in range(1, 6):
     
         # read the input file
-        ifp = f'./6_output/SpliceAI/spliceai_data.v{version_num}.{id[0]}.{id[1]}.csv'
+        ifp = f'./6_output/SpliceAI/{id[1]}/spliceai_data.v{version_num}.{id[0]}.{id[1]}.csv'
         full_df = pd.read_csv(ifp)
 
         # add column indicating which version of the model data is from
@@ -270,7 +269,7 @@ def aggregate_data(id):
 def get_counts(df, id, ofp):
 
     # get the fasta file with the sequence used by spliceai
-    fa_file = f'./output/data/{id[1]}_spliceai_seq_{id[0]}.fa'
+    fa_file = f'./3_output/{id[1]}/seq_{id[0]}.fa'
     fa = Fasta(fa_file, key_function = lambda x: x[:-2], duplicate_action='first')
     
     # iterate over each row and get the nucleotide counts
@@ -326,7 +325,11 @@ def get_averages(df, ofp):
 
 
 if __name__ == '__main__':
-    dbs = ['Mmul_10', 'NHGRI_mPanTro3', 'GRCm39', 'TAIR10']
+
+    if os.getcwd() != 'neg_test':
+        os.chdir('/home/smao10/splam-analysis-results/benchmark/src_generalization_test/neg_test/')
+
+    dbs = ['GRCm39', 'Mmul_10', 'NHGRI_mPanTro3', 'TAIR10']
     nums = [0,1,2,3] # CHANGEME
 
     for num in nums:

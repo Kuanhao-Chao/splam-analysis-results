@@ -79,6 +79,7 @@ def main(argv):
             exit()    
         if pidx % 2 == 0:
             chr, start, end, strand = all_lines[pidx].split(";")
+            chr = chr[1:]
             name_fw.write(' '.join([chr, start, end, strand])+"\n")
             pass
         elif pidx % 2 == 1:

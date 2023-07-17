@@ -3,6 +3,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from math import ceil
 import numpy as np
 from sklearn.metrics import average_precision_score
+import re
 
 JUNC_START = 150
 JUNC_END = 450
@@ -18,8 +19,10 @@ def ceil_div(x, y):
 def create_datapoints(seq, strand):
     # print("seq length: ", len(seq))
     # seq = 'N'*(CL_MAX//2) + seq + 'N'*(CL_MAX//2)
-    seq = seq.upper().replace('A', '1').replace('C', '2')
-    seq = seq.replace('G', '3').replace('T', '4').replace('N', '0').replace('K', '0').replace('R', '0')
+    seq = seq.upper().replace('A', '1').replace('C', '2').replace('G', '3').replace('T', '4')
+    pattern = r'[^1234]'
+    # Replace non-ACGT characters with 0
+    seq = re.sub(pattern, '0', seq)
     jn_start = 0
     jn_end = len(seq)-10000-1
     # print("Donor: ", seq[CL_MAX//2+jn_start: CL_MAX//2+jn_start+2])

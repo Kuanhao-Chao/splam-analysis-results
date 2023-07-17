@@ -260,7 +260,7 @@ def main(db):
 if __name__ == "__main__":
 
     if os.getcwd() != 'neg_test':
-        os.chdir('/home/smao10/SPLAM/benchmark/src_generalization_test/neg_test/')
+        os.chdir('/home/smao10/splam-analysis-results/benchmark/src_generalization_test/neg_test/')
 
     datasets = ['GRCm39', 'Mmul_10', 'NHGRI_mPanTro3', 'TAIR10']
     idxs = [0,1,2,3] #CHANGEME
