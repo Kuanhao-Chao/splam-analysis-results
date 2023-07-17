@@ -5,22 +5,22 @@
 import numpy as np
 import pandas as pd
 import itertools
-threshold = 0.8
+threshold = 0.1
 
 ###### INPUT DATA #########
 def read_inputs(db):
     # positive
-    noN_pos_df = pd.read_csv(f'../pos_test/data/aggregate/avg_data.noN.{db}.csv')
+    noN_pos_df = pd.read_csv(f'../pos_test/6_output/combine/averaged_data.noN.{db}.csv')
     noN_pos_df['true_label'] = True
     print(len(noN_pos_df))
 
     # negative
-    noN_neg_df = pd.read_csv(f'../neg_test/data/aggregate/avg_data.noN.{db}.csv')
+    noN_neg_df = pd.read_csv(f'../neg_test/6_output/combine/averaged_data.noN.{db}.csv')
     noN_neg_df['true_label'] = False
     print(len(noN_neg_df))
 
-    noN_pos_df = noN_pos_df.sample(n=12000, random_state=1091)
-    noN_neg_df = noN_neg_df.sample(n=12000, random_state=5802)
+    noN_pos_df = noN_pos_df.sample(n=9000, random_state=1091)
+    noN_neg_df = noN_neg_df.sample(n=9000, random_state=5802)
 
     noN_merge_df = pd.concat([noN_pos_df, noN_neg_df], axis=0)
 

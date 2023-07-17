@@ -1,0 +1,13 @@
+pos_test
+- fix the missing first characters in spliceai_result_1, GRCm39, noN type name file
+- regenerate the csv files after the GRC run
+- re-run TAIR
+- regenerate the csv fiels for TAIR
+
+neg_test
+- re-run TAIR
+- regnerate the csv files for TAIR
+
+figures
+- make the ROC / PR figures
+- obtain new threshold stats.py after the GRC and TAIR reruns
