@@ -103,7 +103,7 @@ def main():
                         #####################################
                         # Creating directories for visualization.
                         #####################################
-                        # figure_root = "./IMG/d_a/"
+                        # figure_root = "./IMG_FULL/d_a/"
 
                         #####################################
                         # Declaring parameters for probability & prediction array
@@ -137,9 +137,9 @@ def main():
                         #####################################
                         # Creating directories for visualization.
                         #####################################
-                        os.makedirs("IMG/" + SPLAM_VERSION + "/"+SPLICEAI_VERSION+"/TP_TN_FP_FN/"+TARGET+"/", exist_ok=True)
+                        os.makedirs("IMG_FULL/" + SPLAM_VERSION + "/"+SPLICEAI_VERSION+"/TP_TN_FP_FN/"+TARGET+"/", exist_ok=True)
 
-                        figure_root = "./IMG/"+SPLAM_VERSION+"/"+SPLICEAI_VERSION+"/scatter_plot/"
+                        figure_root = "./IMG_FULL/"+SPLAM_VERSION+"/"+SPLICEAI_VERSION+"/scatter_plot/"
                         target_figure_root = figure_root+TARGET+"/"
                         # os.makedirs(target_figure_root+"tsv_"+str(threshold)+"/", exist_ok=True)
                         
@@ -285,15 +285,15 @@ def main():
 
                     # plt.plot(THRESHOLDS_PLT, spliceai_FN__splam_TP, label="SPLAM captured\nSpliceAI missed", color="#2ca02c")
                     
-                    plt.plot(THRESHOLDS_PLT, spliceai_FN__splam_TP, label="SPLAM_TP & SpliceAI_FN", linewidth=2)
-                    plt.plot(THRESHOLDS_PLT, spliceai_FP__splam_TN, label="SPLAM_TN & SpliceAI_FP", linewidth=2)
+                    plt.plot(THRESHOLDS_PLT, spliceai_FN__splam_TP, label="Splam_TP & SpliceAI-10k-Ns_FN", linewidth=2)
+                    plt.plot(THRESHOLDS_PLT, spliceai_FP__splam_TN, label="Splam_TN & SpliceAI-10k-Ns_FP", linewidth=2)
                     
                     # plt.plot(THRESHOLDS_PLT, spliceai_TP__splam_FN, label="SpliceAI captured\nSPLAM missed", color="#ff7f0e")
-                    plt.plot(THRESHOLDS_PLT, spliceai_TP__splam_FN, label="SPLAM_FN & SpliceAI_TP", linewidth=2)
+                    plt.plot(THRESHOLDS_PLT, spliceai_TP__splam_FN, label="Splam_FN & SpliceAI-10k-Ns_TP", linewidth=2)
                     
-                    plt.plot(THRESHOLDS_PLT, spliceai_TN__splam_FP, label="SPLAM_FP & SpliceAI_TN", linewidth=2)
-                    plt.plot(THRESHOLDS_PLT, spliceai_FN__splam_FN, label="SPLAM_FN & SpliceAI_FN", linewidth=2)
-                    plt.plot(THRESHOLDS_PLT, spliceai_FP__splam_FP, label="SPLAM_FP & SpliceAI_FP", linewidth=2)
+                    plt.plot(THRESHOLDS_PLT, spliceai_TN__splam_FP, label="Splam_FP & SpliceAI-10k-Ns_TN", linewidth=2)
+                    plt.plot(THRESHOLDS_PLT, spliceai_FN__splam_FN, label="Splam_FN & SpliceAI-10k-Ns_FN", linewidth=2)
+                    plt.plot(THRESHOLDS_PLT, spliceai_FP__splam_FP, label="Splam_FP & SpliceAI-10k-Ns_FP", linewidth=2)
                     
                     # plt.axvline(x = splam_threshold, linestyle ='--', color = 'r', label = 'Dot plot threshold ('+str(splam_threshold)+')')
                     # plt.text(splam_threshold+0.01, spliceai_TP__splam_FN[100]+50, str(spliceai_TP__splam_FN[100]))
@@ -307,7 +307,7 @@ def main():
 
                     plt.legend(loc="upper center", bbox_to_anchor=(0.5, 1.25), labelspacing=2, ncol=3)
                     plt.tight_layout()
-                    plt.savefig("IMG/" + SPLAM_VERSION + "/"+SPLICEAI_VERSION+"/TP_TN_FP_FN/"+TARGET+"/threshold_"+x_axis_rep+"_"+str(threshold_min)+"_"+str(threshold_max)+".png", dpi=300)
+                    plt.savefig("IMG_FULL/" + SPLAM_VERSION + "/"+SPLICEAI_VERSION+"/TP_TN_FP_FN/"+TARGET+"/threshold_"+x_axis_rep+"_"+str(threshold_min)+"_"+str(threshold_max)+".png", dpi=300)
                     # plt.show()
                     plt.close()
 
