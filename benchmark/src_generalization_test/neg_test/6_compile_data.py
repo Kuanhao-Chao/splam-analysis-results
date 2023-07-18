@@ -93,7 +93,7 @@ def collect_splam(score_file, db_name, output_file):
 def spliceai_aggregator(TYPE, SPLICEAI_VERSION, db):
 
     # define identifiers for this run
-    print('*'*170)
+    print('*'*140)
     print(f'Parsing for type {TYPE}, SpliceAI version {SPLICEAI_VERSION}, database {db}')
 
     # input filepaths
@@ -330,7 +330,7 @@ if __name__ == '__main__':
         os.chdir('/home/smao10/splam-analysis-results/benchmark/src_generalization_test/neg_test/')
 
     dbs = ['GRCm39', 'Mmul_10', 'NHGRI_mPanTro3', 'TAIR10']
-    nums = [0,1,2,3] # CHANGEME
+    nums = [0] # CHANGEME
 
     for num in nums:
         run_all(dbs[num])
