@@ -5,7 +5,7 @@
 import numpy as np
 import pandas as pd
 import itertools
-threshold = 0.1
+threshold = 0.15
 
 ###### INPUT DATA #########
 def read_inputs(db):
