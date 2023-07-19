@@ -104,7 +104,7 @@ def plot(df):
         plt.legend(title='Model')
         plt.yscale('log')
         
-         # Save the plot as an image file (PNG format)
+        # Save the plot as an image file (PNG format)
         plt.savefig(f'./{threshold}/F1_Scores_{database}.png', bbox_inches='tight', dpi=300)
     
 
