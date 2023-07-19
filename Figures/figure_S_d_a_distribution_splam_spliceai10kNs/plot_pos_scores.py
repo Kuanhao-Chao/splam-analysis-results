@@ -6,9 +6,9 @@ import random
 import os
 
 def main():
-    # for TOOL in ["SPLAM", "SPLICEAI"]:
+    # for TOOL in ["Splam", "SPLICEAI"]:
     COLORS = ["green", "blue"]
-    TOOLS = ["SPLAM", "SpliceAI-10k-Ns"]#, "SpliceAI-10k-Ns"]
+    TOOLS = ["Splam", "SpliceAI-10k-Ns"]#, "SpliceAI-10k-Ns"]
     TARGETS = ["Donor", "Acceptor"]
     output_files = ["pos_MANE", "pos_ALTS"]#, "neg_1", "neg_random"] 
     FIGURE_ROOT = "Figures/"
@@ -21,7 +21,7 @@ def main():
                     HANDELS = []
                     for INDEX in range(len(TOOLS)):
                         TOOL = TOOLS[INDEX]
-                        if TOOL == "SPLAM":
+                        if TOOL == "Splam":
                             TYPE = "noshuffle"
                             d_score_tsv_f = "../../src_tools_evaluation/splam_result/"+SPLAM_VERSION+"/"+output_file+"/splam_all_seq.score.d."+TYPE+"."+output_file+".tsv"
                             a_score_tsv_f = "../../src_tools_evaluation/splam_result/"+SPLAM_VERSION+"/"+output_file+"/splam_all_seq.score.a."+TYPE+"."+output_file+".tsv"
@@ -41,13 +41,13 @@ def main():
                             n_score_tsv_f = "../../src_tools_evaluation/spliceai_result_"+SPLICEAI_VERSION+"/"+output_file+"/spliceai_all_seq.score.n."+TYPE+"."+output_file+".tsv"
 
                         color_plt = ""
-                        if TOOL == "SPLAM":
+                        if TOOL == "Splam":
                             color_plt = "#2ca02c" 
                         elif TOOL == "SpliceAI-10k" or TOOL == "SpliceAI-10k-Ns":
                             color_plt = "#1f77b4"
 
                         if TARGET == "Donor":
-                            if TOOL == "SPLAM":
+                            if TOOL == "Splam":
                                 target_idx = 201
                             elif TOOL == "SpliceAI-10k" or TOOL == "SpliceAI-10k-Ns":
                                 target_idx = 200

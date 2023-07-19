@@ -109,8 +109,6 @@ def main():
                 #####################################
                 # Creating directories for visualization.
                 #####################################
-                os.makedirs("./IMG_FULL/"+SPLAM_VERSION+"/junction/", exist_ok=True)
-
 
                 for TARGET in ["noN", "N"]:
                     figure_root = "./IMG_FULL/"+SPLAM_VERSION+"/"+SPLICEAI_VERSION+"/scatter_plot/"
@@ -142,18 +140,18 @@ def main():
                     # spliceai_a_label = np.array(spliceai_a_label)
                     # spliceai_d_label = np.array(spliceai_d_label)
 
-                    # print("spliceai_d_pred : ", spliceai_d_pred)
-                    # print("spliceai_d_label: ", spliceai_d_label)
-                    # print("spliceai_a_pred : ", spliceai_a_pred)
-                    # print("spliceai_a_label: ", spliceai_a_label)
-                    # print("spliceai_d_label: ", spliceai_d_label)
+                    # print("SpliceAI-10k-Ns_d_pred : ", spliceai_d_pred)
+                    # print("SpliceAI-10k-Ns_d_label: ", spliceai_d_label)
+                    # print("SpliceAI-10k-Ns_a_pred : ", spliceai_a_pred)
+                    # print("SpliceAI-10k-Ns_a_label: ", spliceai_a_label)
+                    # print("SpliceAI-10k-Ns_d_label: ", spliceai_d_label)
 
-                    # print("spliceai_d_pred : ", len(spliceai_d_pred))
-                    # print("spliceai_d_label: ", len(spliceai_d_label))
-                    # print("spliceai_a_pred : ", len(spliceai_a_pred))
-                    # print("spliceai_a_label: ", len(spliceai_a_label))
+                    # print("SpliceAI-10k-Ns_d_pred : ", len(spliceai_d_pred))
+                    # print("SpliceAI-10k-Ns_d_label: ", len(spliceai_d_label))
+                    # print("SpliceAI-10k-Ns_a_pred : ", len(spliceai_a_pred))
+                    # print("SpliceAI-10k-Ns_a_label: ", len(spliceai_a_label))
 
-                    # print("spliceai_d_label: ", len(spliceai_d_label))
+                    # print("SpliceAI-10k-Ns_d_label: ", len(spliceai_d_label))
 
 
                     # with open("../../src_tools_evaluation/splam_result/splam.da.shuffle.pkl",'rb') as f:
@@ -192,10 +190,10 @@ def main():
                     # spliceai_N_FP_idices = (spliceai_N_d_pred_prob >= threshold) & (spliceai_N_a_pred_prob >= threshold) & (spliceai_N_d_label_prob == 0)
                     # spliceai_N_TN_idices = ((spliceai_N_d_pred_prob < threshold) | (spliceai_N_a_pred_prob < threshold)) & (spliceai_N_d_label_prob == 0)
 
-                    # print("spliceai_TP_idices : ", len(spliceai_N_junc_name[spliceai_N_TP_idices]))
-                    # print("spliceai_FP_idices : ", len(spliceai_N_junc_name[spliceai_N_FP_idices]))
-                    # print("spliceai_FN_idices : ", len(spliceai_N_junc_name[spliceai_N_FN_idices]))
-                    # print("spliceai_TN_idices : ", len(spliceai_N_junc_name[spliceai_N_TN_idices]))
+                    # print("SpliceAI-10k-Ns_TP_idices : ", len(spliceai_N_junc_name[spliceai_N_TP_idices]))
+                    # print("SpliceAI-10k-Ns_FP_idices : ", len(spliceai_N_junc_name[spliceai_N_FP_idices]))
+                    # print("SpliceAI-10k-Ns_FN_idices : ", len(spliceai_N_junc_name[spliceai_N_FN_idices]))
+                    # print("SpliceAI-10k-Ns_TN_idices : ", len(spliceai_N_junc_name[spliceai_N_TN_idices]))
 
 
                     # print(spliceai_d_pred >= threshold)
@@ -204,10 +202,10 @@ def main():
                     spliceai_FP_idices = (spliceai_d_pred >= threshold) & (spliceai_a_pred >= threshold) & (spliceai_d_label == 0)
                     spliceai_TN_idices = ((spliceai_d_pred < threshold) | (spliceai_a_pred < threshold)) & (spliceai_d_label == 0)
 
-                    print("spliceai_TP_idices : ", len(spliceai_d_label[spliceai_TP_idices]))
-                    print("spliceai_FP_idices : ", len(spliceai_d_label[spliceai_FP_idices]))
-                    print("spliceai_FN_idices : ", len(spliceai_d_label[spliceai_FN_idices]))
-                    print("spliceai_TN_idices : ", len(spliceai_d_label[spliceai_TN_idices]))
+                    print("SpliceAI-10k-Ns_TP_idices : ", len(spliceai_d_label[spliceai_TP_idices]))
+                    print("SpliceAI-10k-Ns_FP_idices : ", len(spliceai_d_label[spliceai_FP_idices]))
+                    print("SpliceAI-10k-Ns_FN_idices : ", len(spliceai_d_label[spliceai_FN_idices]))
+                    print("SpliceAI-10k-Ns_TN_idices : ", len(spliceai_d_label[spliceai_TN_idices]))
 
 
                     splam_TP_idices = (splam_d_pred >= threshold) & (splam_a_pred >= threshold) & (splam_d_label== 1)
@@ -220,23 +218,23 @@ def main():
                     print("splam_FN_idices : ", len(splam_d_pred[splam_FN_idices]))
                     print("splam_TN_idices : ", len(splam_d_pred[splam_TN_idices]))
 
-                    spliceai_TP__splam_TP_idices = spliceai_TP_idices & splam_TP_idices
-                    spliceai_TP__splam_FN_idices = spliceai_TP_idices & splam_FN_idices
-                    spliceai_FN__splam_TP_idices = spliceai_FN_idices & splam_TP_idices
-                    spliceai_FN__splam_FN_idices = spliceai_FN_idices & splam_FN_idices
+                    spliceai_TP__Splam_TP_idices = spliceai_TP_idices & splam_TP_idices
+                    spliceai_TP__Splam_FN_idices = spliceai_TP_idices & splam_FN_idices
+                    spliceai_FN__Splam_TP_idices = spliceai_FN_idices & splam_TP_idices
+                    spliceai_FN__Splam_FN_idices = spliceai_FN_idices & splam_FN_idices
 
-                    spliceai_TN__splam_TN_idices = spliceai_TN_idices & splam_TN_idices
-                    spliceai_TN__splam_FP_idices = spliceai_TN_idices & splam_FP_idices
-                    spliceai_FP__splam_TN_idices = spliceai_FP_idices & splam_TN_idices
-                    spliceai_FP__splam_FP_idices = spliceai_FP_idices & splam_FP_idices
+                    spliceai_TN__Splam_TN_idices = spliceai_TN_idices & splam_TN_idices
+                    spliceai_TN__Splam_FP_idices = spliceai_TN_idices & splam_FP_idices
+                    spliceai_FP__Splam_TN_idices = spliceai_FP_idices & splam_TN_idices
+                    spliceai_FP__Splam_FP_idices = spliceai_FP_idices & splam_FP_idices
 
-                    # print("spliceai_TP__splam_FN_idices : ", len(splam_d_pred[spliceai_TP__splam_FN_idices]))
-                    # print("spliceai_FN__splam_TP_idices : ", len(splam_d_pred[spliceai_FN__splam_TP_idices]))
-                    # print("spliceai_FN__splam_FN_idices : ", len(splam_d_pred[spliceai_FN__splam_FN_idices]))
+                    # print("SpliceAI-10k-Ns_TP__Splam_FN_idices : ", len(splam_d_pred[spliceai_TP__Splam_FN_idices]))
+                    # print("SpliceAI-10k-Ns_FN__Splam_TP_idices : ", len(splam_d_pred[spliceai_FN__Splam_TP_idices]))
+                    # print("SpliceAI-10k-Ns_FN__Splam_FN_idices : ", len(splam_d_pred[spliceai_FN__Splam_FN_idices]))
 
-                    # print("spliceai_TP__splam_FN_idices : ", len(splam_d_pred[spliceai_TN__splam_FP_idices]))
-                    # print("spliceai_FN__splam_TP_idices : ", len(splam_d_pred[spliceai_FP__splam_TN_idices]))
-                    # print("spliceai_FN__splam_FN_idices : ", len(splam_d_pred[spliceai_FP__splam_FP_idices]))
+                    # print("SpliceAI-10k-Ns_TP__Splam_FN_idices : ", len(splam_d_pred[spliceai_TN__Splam_FP_idices]))
+                    # print("SpliceAI-10k-Ns_FN__Splam_TP_idices : ", len(splam_d_pred[spliceai_FP__Splam_TN_idices]))
+                    # print("SpliceAI-10k-Ns_FN__Splam_FN_idices : ", len(splam_d_pred[spliceai_FP__Splam_FP_idices]))
 
                     # junc_prob = label_d.astype(bool)
                     # non_junc_prob = (1-label_d).astype(bool)
@@ -246,21 +244,21 @@ def main():
 
                     for TYPE in ["TP_TP", "TP_FN", "FN_TP", "FN_FN", "TN_TN", "TN_FP", "FP_TN", "FP_FP"]:
                         if TYPE == "TP_TP":
-                            indices = spliceai_TP__splam_TP_idices
+                            indices = spliceai_TP__Splam_TP_idices
                         elif TYPE == "TP_FN":
-                            indices = spliceai_TP__splam_FN_idices
+                            indices = spliceai_TP__Splam_FN_idices
                         elif TYPE == "FN_TP":
-                            indices = spliceai_FN__splam_TP_idices
+                            indices = spliceai_FN__Splam_TP_idices
                         elif TYPE == "FN_FN":
-                            indices = spliceai_FN__splam_FN_idices
+                            indices = spliceai_FN__Splam_FN_idices
                         elif TYPE == "TN_TN":
-                            indices = spliceai_TN__splam_TN_idices
+                            indices = spliceai_TN__Splam_TN_idices
                         elif TYPE == "TN_FP":
-                            indices = spliceai_TN__splam_FP_idices
+                            indices = spliceai_TN__Splam_FP_idices
                         elif TYPE == "FP_TN":
-                            indices = spliceai_FP__splam_TN_idices
+                            indices = spliceai_FP__Splam_TN_idices
                         elif TYPE == "FP_FP":
-                            indices = spliceai_FP__splam_FP_idices
+                            indices = spliceai_FP__Splam_FP_idices
 
                         fw = open(target_figure_root+"tsv_"+str(threshold)+"/"+TYPE+"_junc_"+str(threshold)+".tsv", "w")
                         # for junc in splam_d_pred[indices]:
@@ -271,11 +269,11 @@ def main():
 
 
                     plt.rcParams['font.size'] = 4
-                    for TOOL in ["spliceai", "splam"]:
-                        if TOOL == "spliceai":
+                    for TOOL in ["SpliceAI-10k-Ns", "Splam"]:
+                        if TOOL == "SpliceAI-10k-Ns":
                             d_score = spliceai_d_pred
                             a_score = spliceai_a_pred
-                        elif TOOL == "splam":
+                        elif TOOL == "Splam":
                             d_score = splam_d_pred
                             a_score = splam_a_pred
 
@@ -317,59 +315,59 @@ def main():
                             axes[axis].set_title(title)
 
 
-                        spliceai_TP__splam_TP = axes["main"].scatter(d_score[spliceai_TP__splam_TP_idices], a_score[spliceai_TP__splam_TP_idices], s = 0, color="pink", alpha=1.0)
-                        spliceai_TP__splam_TP_len = len(d_score[spliceai_TP__splam_TP_idices])
+                        spliceai_TP__Splam_TP = axes["main"].scatter(d_score[spliceai_TP__Splam_TP_idices], a_score[spliceai_TP__Splam_TP_idices], s = 0, color="pink", alpha=1.0)
+                        spliceai_TP__Splam_TP_len = len(d_score[spliceai_TP__Splam_TP_idices])
 
-                        spliceai_TP__splam_FN = axes["main"].scatter(d_score[spliceai_TP__splam_FN_idices], a_score[spliceai_TP__splam_FN_idices], s = 0.3, color="#13E8EC", alpha=1.0)
-                        spliceai_TP__splam_FN_len = len(d_score[spliceai_TP__splam_FN_idices])
+                        spliceai_TP__Splam_FN = axes["main"].scatter(d_score[spliceai_TP__Splam_FN_idices], a_score[spliceai_TP__Splam_FN_idices], s = 0.3, color="#13E8EC", alpha=1.0)
+                        spliceai_TP__Splam_FN_len = len(d_score[spliceai_TP__Splam_FN_idices])
 
-                        spliceai_FN__splam_TP = axes["main"].scatter(d_score[spliceai_FN__splam_TP_idices], a_score[spliceai_FN__splam_TP_idices], s = 0.3, color="#EC1713", alpha=1.0)
-                        spliceai_FN__splam_TP_len = len(d_score[spliceai_FN__splam_TP_idices])
+                        spliceai_FN__Splam_TP = axes["main"].scatter(d_score[spliceai_FN__Splam_TP_idices], a_score[spliceai_FN__Splam_TP_idices], s = 0.3, color="#EC1713", alpha=1.0)
+                        spliceai_FN__Splam_TP_len = len(d_score[spliceai_FN__Splam_TP_idices])
 
-                        spliceai_FN__splam_FN = axes["main"].scatter(d_score[spliceai_FN__splam_FN_idices], a_score[spliceai_FN__splam_FN_idices], s = 0.3, color="#118F14", alpha=1.0)
-                        spliceai_FN__splam_FN_len = len(d_score[spliceai_FN__splam_FN_idices])
-
-
-                        spliceai_TN__splam_TN = axes["main"].scatter(d_score[spliceai_TN__splam_TN_idices], a_score[spliceai_TN__splam_TN_idices], s = 0, color="gray", alpha=1.0)
-                        spliceai_TN__splam_TN_len = len(d_score[spliceai_TN__splam_TN_idices])
-
-                        spliceai_TN__splam_FP = axes["main"].scatter(d_score[spliceai_TN__splam_FP_idices], a_score[spliceai_TN__splam_FP_idices], s = 0.3, color="#FFA300", alpha=1.0)
-                        spliceai_TN__splam_FP_len = len(d_score[spliceai_TN__splam_FP_idices])
-
-                        spliceai_FP__splam_TN = axes["main"].scatter(d_score[spliceai_FP__splam_TN_idices], a_score[spliceai_FP__splam_TN_idices], s = 0.3, color="#005CFF", alpha=1.0)
-                        spliceai_FP__splam_TN_len = len(d_score[spliceai_FP__splam_TN_idices])
-
-                        spliceai_FP__splam_FP = axes["main"].scatter(d_score[spliceai_FP__splam_FP_idices], a_score[spliceai_FP__splam_FP_idices], s = 0.3, color="#8F118C", alpha=1.0)
-                        spliceai_FP__splam_FP_len = len(d_score[spliceai_FP__splam_FP_idices])
+                        spliceai_FN__Splam_FN = axes["main"].scatter(d_score[spliceai_FN__Splam_FN_idices], a_score[spliceai_FN__Splam_FN_idices], s = 0.3, color="#118F14", alpha=1.0)
+                        spliceai_FN__Splam_FN_len = len(d_score[spliceai_FN__Splam_FN_idices])
 
 
-                        spliceai_TP__splam_FN = axes["TPFN"].scatter(d_score[spliceai_TP__splam_FN_idices], a_score[spliceai_TP__splam_FN_idices], s = 0.3, color="#13E8EC", alpha=1.0)
-                        spliceai_TP__splam_FN_len = len(d_score[spliceai_TP__splam_FN_idices])
-                        spliceai_FN__splam_TP = axes["TPFN"].scatter(d_score[spliceai_FN__splam_TP_idices], a_score[spliceai_FN__splam_TP_idices], s = 0.3, color="#EC1713", alpha=1.0)
-                        spliceai_FN__splam_TP_len = len(d_score[spliceai_FN__splam_TP_idices])
+                        spliceai_TN__Splam_TN = axes["main"].scatter(d_score[spliceai_TN__Splam_TN_idices], a_score[spliceai_TN__Splam_TN_idices], s = 0, color="gray", alpha=1.0)
+                        spliceai_TN__Splam_TN_len = len(d_score[spliceai_TN__Splam_TN_idices])
 
-                        spliceai_TN__splam_FP = axes["FPTN"].scatter(d_score[spliceai_TN__splam_FP_idices], a_score[spliceai_TN__splam_FP_idices], s = 0.3, color="#FFA300", alpha=1.0)
-                        spliceai_TN__splam_FP_len = len(d_score[spliceai_TN__splam_FP_idices])
-                        spliceai_FP__splam_TN = axes["FPTN"].scatter(d_score[spliceai_FP__splam_TN_idices], a_score[spliceai_FP__splam_TN_idices], s = 0.3, color="#005CFF", alpha=1.0)
-                        spliceai_FP__splam_TN_len = len(d_score[spliceai_FP__splam_TN_idices])
+                        spliceai_TN__Splam_FP = axes["main"].scatter(d_score[spliceai_TN__Splam_FP_idices], a_score[spliceai_TN__Splam_FP_idices], s = 0.3, color="#FFA300", alpha=1.0)
+                        spliceai_TN__Splam_FP_len = len(d_score[spliceai_TN__Splam_FP_idices])
 
-                        spliceai_FP__splam_FP = axes["FPFN"].scatter(d_score[spliceai_FP__splam_FP_idices], a_score[spliceai_FP__splam_FP_idices], s = 0.3, color="#8F118C", alpha=1.0)
-                        spliceai_FP__splam_FP_len = len(d_score[spliceai_FP__splam_FP_idices])
-                        spliceai_FN__splam_FN = axes["FPFN"].scatter(d_score[spliceai_FN__splam_FN_idices], a_score[spliceai_FN__splam_FN_idices], s = 0.3, color="#118F14", alpha=1.0)
-                        spliceai_FN__splam_FN_len = len(d_score[spliceai_FN__splam_FN_idices])
+                        spliceai_FP__Splam_TN = axes["main"].scatter(d_score[spliceai_FP__Splam_TN_idices], a_score[spliceai_FP__Splam_TN_idices], s = 0.3, color="#005CFF", alpha=1.0)
+                        spliceai_FP__Splam_TN_len = len(d_score[spliceai_FP__Splam_TN_idices])
+
+                        spliceai_FP__Splam_FP = axes["main"].scatter(d_score[spliceai_FP__Splam_FP_idices], a_score[spliceai_FP__Splam_FP_idices], s = 0.3, color="#8F118C", alpha=1.0)
+                        spliceai_FP__Splam_FP_len = len(d_score[spliceai_FP__Splam_FP_idices])
+
+
+                        spliceai_TP__Splam_FN = axes["TPFN"].scatter(d_score[spliceai_TP__Splam_FN_idices], a_score[spliceai_TP__Splam_FN_idices], s = 0.3, color="#13E8EC", alpha=1.0)
+                        spliceai_TP__Splam_FN_len = len(d_score[spliceai_TP__Splam_FN_idices])
+                        spliceai_FN__Splam_TP = axes["TPFN"].scatter(d_score[spliceai_FN__Splam_TP_idices], a_score[spliceai_FN__Splam_TP_idices], s = 0.3, color="#EC1713", alpha=1.0)
+                        spliceai_FN__Splam_TP_len = len(d_score[spliceai_FN__Splam_TP_idices])
+
+                        spliceai_TN__Splam_FP = axes["FPTN"].scatter(d_score[spliceai_TN__Splam_FP_idices], a_score[spliceai_TN__Splam_FP_idices], s = 0.3, color="#FFA300", alpha=1.0)
+                        spliceai_TN__Splam_FP_len = len(d_score[spliceai_TN__Splam_FP_idices])
+                        spliceai_FP__Splam_TN = axes["FPTN"].scatter(d_score[spliceai_FP__Splam_TN_idices], a_score[spliceai_FP__Splam_TN_idices], s = 0.3, color="#005CFF", alpha=1.0)
+                        spliceai_FP__Splam_TN_len = len(d_score[spliceai_FP__Splam_TN_idices])
+
+                        spliceai_FP__Splam_FP = axes["FPFN"].scatter(d_score[spliceai_FP__Splam_FP_idices], a_score[spliceai_FP__Splam_FP_idices], s = 0.3, color="#8F118C", alpha=1.0)
+                        spliceai_FP__Splam_FP_len = len(d_score[spliceai_FP__Splam_FP_idices])
+                        spliceai_FN__Splam_FN = axes["FPFN"].scatter(d_score[spliceai_FN__Splam_FN_idices], a_score[spliceai_FN__Splam_FN_idices], s = 0.3, color="#118F14", alpha=1.0)
+                        spliceai_FN__Splam_FN_len = len(d_score[spliceai_FN__Splam_FN_idices])
 
 
                         # non_junc_legend = ax.scatter(score_d[non_junc_prob], score_a[non_junc_prob], s = 0.3)
-                        # lgd = fig.legend([spliceai_TP__splam_TP, spliceai_TP__splam_FN, spliceai_FN__splam_TP, spliceai_FN__splam_FN, spliceai_TN__splam_TN, spliceai_TN__splam_FP, spliceai_FP__splam_TN, spliceai_FP__splam_FP], ["spliceai_TP__splam_TP ("+str(spliceai_TP__splam_TP_len)+")", "spliceai_TP__splam_FN ("+str(spliceai_TP__splam_FN_len)+")", "spliceai_FN__splam_TP ("+str(spliceai_FN__splam_TP_len)+")", "spliceai_FN__splam_FN ("+str(spliceai_FN__splam_FN_len)+")", "spliceai_TN__splam_TN ("+str(spliceai_TN__splam_TN_len)+")", "spliceai_TN__splam_FP ("+str(spliceai_TN__splam_FP_len)+")", "spliceai_FP__splam_TN ("+str(spliceai_FP__splam_TN_len)+")", "spliceai_FP__splam_FP ("+str(spliceai_FP__splam_FP_len)+")"], loc='lower right', bbox_to_anchor=(0.9, 0.27))
+                        # lgd = fig.legend([spliceai_TP__Splam_TP, spliceai_TP__Splam_FN, spliceai_FN__Splam_TP, spliceai_FN__Splam_FN, spliceai_TN__Splam_TN, spliceai_TN__Splam_FP, spliceai_FP__Splam_TN, spliceai_FP__Splam_FP], ["SpliceAI-10k-Ns_TP__Splam_TP ("+str(spliceai_TP__Splam_TP_len)+")", "SpliceAI-10k-Ns_TP__Splam_FN ("+str(spliceai_TP__Splam_FN_len)+")", "SpliceAI-10k-Ns_FN__Splam_TP ("+str(spliceai_FN__Splam_TP_len)+")", "SpliceAI-10k-Ns_FN__Splam_FN ("+str(spliceai_FN__Splam_FN_len)+")", "SpliceAI-10k-Ns_TN__Splam_TN ("+str(spliceai_TN__Splam_TN_len)+")", "SpliceAI-10k-Ns_TN__Splam_FP ("+str(spliceai_TN__Splam_FP_len)+")", "SpliceAI-10k-Ns_FP__Splam_TN ("+str(spliceai_FP__Splam_TN_len)+")", "SpliceAI-10k-Ns_FP__Splam_FP ("+str(spliceai_FP__Splam_FP_len)+")"], loc='lower right', bbox_to_anchor=(0.9, 0.27))
 
-                        lgd = fig.legend([spliceai_TP__splam_FN, spliceai_FN__splam_TP, spliceai_TN__splam_FP, spliceai_FP__splam_TN, spliceai_FN__splam_FN, spliceai_FP__splam_FP], ["spliceai_TP__splam_FN ("+str(spliceai_TP__splam_FN_len)+")", "spliceai_FN & splam_TP ("+str(spliceai_FN__splam_TP_len)+")", "spliceai_TN & splam_FP ("+str(spliceai_TN__splam_FP_len)+")", "spliceai_FP & splam_TN ("+str(spliceai_FP__splam_TN_len)+")", "spliceai_FN & splam_FN ("+str(spliceai_FN__splam_FN_len)+")", "spliceai_FP & splam_FP ("+str(spliceai_FP__splam_FP_len)+")"], loc='lower right', bbox_to_anchor=(0.9, 0.27), ncol=3)
+                        lgd = fig.legend([spliceai_TP__Splam_FN, spliceai_FN__Splam_TP, spliceai_TN__Splam_FP, spliceai_FP__Splam_TN, spliceai_FN__Splam_FN, spliceai_FP__Splam_FP], ["SpliceAI-10k-Ns_TP & Splam_FN ("+str(spliceai_TP__Splam_FN_len)+")", "SpliceAI-10k-Ns_FN & Splam_TP ("+str(spliceai_FN__Splam_TP_len)+")", "SpliceAI-10k-Ns_TN & Splam_FP ("+str(spliceai_TN__Splam_FP_len)+")", "SpliceAI-10k-Ns_FP & Splam_TN ("+str(spliceai_FP__Splam_TN_len)+")", "SpliceAI-10k-Ns_FN & Splam_FN ("+str(spliceai_FN__Splam_FN_len)+")", "SpliceAI-10k-Ns_FP & Splam_FP ("+str(spliceai_FP__Splam_FP_len)+")"], loc='lower right', bbox_to_anchor=(0.9, 0.27), ncol=3)
 
 
-                        # lgd = ax.legend([spliceai_TP__splam_TP, spliceai_TP__splam_FN, spliceai_FN__splam_TP], ["spliceai_TP__splam_TP ("+str(spliceai_TP__splam_TP_len)+")", "spliceai_TP__splam_FN ("+str(spliceai_TP__splam_FN_len)+")", "spliceai_FN__splam_TP ("+str(spliceai_FN__splam_TP_len)+")"], loc='center left', bbox_to_anchor=(1, 0.5))
+                        # lgd = ax.legend([spliceai_TP__Splam_TP, spliceai_TP__Splam_FN, spliceai_FN__Splam_TP], ["SpliceAI-10k-Ns_TP__Splam_TP ("+str(spliceai_TP__Splam_TP_len)+")", "SpliceAI-10k-Ns_TP__Splam_FN ("+str(spliceai_TP__Splam_FN_len)+")", "SpliceAI-10k-Ns_FN__Splam_TP ("+str(spliceai_FN__Splam_TP_len)+")"], loc='center left', bbox_to_anchor=(1, 0.5))
 
-                        # lgd = ax.legend([spliceai_FN__splam_FN, spliceai_FP__splam_FP], ["spliceai_FN__splam_FN ("+str(spliceai_FN__splam_FN_len)+")", "spliceai_FP__splam_FP ("+str(spliceai_FP__splam_FP_len)+")"], loc='center left', bbox_to_anchor=(1, 0.5))
+                        # lgd = ax.legend([spliceai_FN__Splam_FN, spliceai_FP__Splam_FP], ["SpliceAI-10k-Ns_FN__Splam_FN ("+str(spliceai_FN__Splam_FN_len)+")", "SpliceAI-10k-Ns_FP__Splam_FP ("+str(spliceai_FP__Splam_FP_len)+")"], loc='center left', bbox_to_anchor=(1, 0.5))
 
-                        # lgd = axes.legend([spliceai_TN__splam_FP, spliceai_FP__splam_TN], ["spliceai_TN__splam_FP ("+str(spliceai_TN__splam_FP_len)+")", "spliceai_FP__splam_TN ("+str(spliceai_FP__splam_TN_len)+")"], loc='center left', bbox_to_anchor=(1, 0.5))
+                        # lgd = axes.legend([spliceai_TN__Splam_FP, spliceai_FP__Splam_TN], ["SpliceAI-10k-Ns_TN__Splam_FP ("+str(spliceai_TN__Splam_FP_len)+")", "SpliceAI-10k-Ns_FP__Splam_TN ("+str(spliceai_FP__Splam_TN_len)+")"], loc='center left', bbox_to_anchor=(1, 0.5))
 
                         axes["main"].set_aspect('equal', adjustable='box')
                         axes["TPFN"].set_aspect('equal', adjustable='box')
@@ -378,6 +376,7 @@ def main():
 
                         # handles, labels = .get_legend_handles_labels()
                         # fig.legend(handles, labels, loc='lower center')
+                        print("File output: " + target_figure_root + TOOL + "_" + str(threshold) + "_" + MANE_OR_ALTS + ".png")
                         plt.savefig(target_figure_root + TOOL + "_" + str(threshold) + "_" + MANE_OR_ALTS + ".png", dpi=600, bbox_extra_artists=(lgd,), bbox_inches='tight')
                         # fig.legend(labels, loc='lower right', bbox_to_anchor=(1,-0.1), ncol=len(labels), bbox_transform=fig.transFigure)
                         # plt.savefig(target_figure_root + TOOL + "_" + str(threshold) + ".png", dpi=300, bbox_inches='tight')

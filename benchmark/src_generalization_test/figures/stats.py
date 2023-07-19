@@ -1,6 +1,6 @@
 # If we choose a score threshold of 0.8, then the
 # (1)sensitivity / (2)accuracy of Splam for (a)donor / (b)acceptor sites / (c)splice junctions  would be
-# X%, Y%, and Z% for chimpanzee, mouse, and Arabidopsis 
+# X%, Y%, and Z% for chimpanzee, mouse, and Arabidopsis
 
 import numpy as np
 import pandas as pd
@@ -34,7 +34,7 @@ def read_inputs(db):
 ####### CALCULATE METRICS ###########
 def calculate_metrics(df, site, model):
     true_labels = df['true_label']
-    
+
     if site == 'donor':
         if model == 'splam':
             scores = df['d_score_splam']
@@ -56,7 +56,7 @@ def calculate_metrics(df, site, model):
             t2 = df['a_score_spliceai']
             scores = pd.concat([t1, t2], axis=0)
             true_labels = pd.concat([true_labels, true_labels], axis=0)
-            
+
     # Apply threshold to scores
     predicted_labels = scores >= threshold
     print(len(predicted_labels), len(true_labels))
@@ -96,7 +96,7 @@ def run():
                 print(f'Calculating for database: {db}, site: {site}, model: {model}')
                 sensitivity, specificity, precision, npv, accuracy, f1_score = calculate_metrics(df, site, model)
                 print(f'\tSensitivity: {sensitivity}\n\tSpecificity: {specificity}\n\tPrecision: {precision}\n\tNPV: {npv}\n\tAccuracy: {accuracy}\n\tF1 Score: {f1_score}\n')
-                
+
                 f.write(f'{db},{site},{model},{sensitivity},{specificity},{precision},{npv},{accuracy},{f1_score}\n')
 
 
