@@ -6,29 +6,29 @@ from pyfaidx import Fasta
 import itertools
 
 '''Run all parts in sequence'''
-def run_all(db_name):
+def run_all(db_name, overwrite_all=False):
     types = ['noN', 'N']
     versions = [1, 2, 3, 4, 5]
 
     print('AGGREGATING SPLAM DATA...')
-    splam_aggregator(db_name)
+    splam_aggregator(db_name, overwrite_all)
     print('SPLAM DONE.')
 
     print('AGGREGATING SPLICEAI DATA...')
     for type, version in itertools.product(types, versions):
-        spliceai_aggregator(type, version, db_name)
+        spliceai_aggregator(type, version, db_name, overwrite_all)
     print('SPLICEAI DONE.')
 
     print('COMBINING...')
     for type in types:
-        combine(type, db_name)
+        combine(type, db_name, overwrite_all)
     print('COMBINE DONE.')
 
 
 #######################
 # RUN SPLAM PORTION
 #######################
-def splam_aggregator(db_name):
+def splam_aggregator(db_name, overwrite=False):
 
     # collect the data to be aggregated from multiple sources
     splam_score_file = f'./4_output/{db_name}/score.bed'
@@ -37,7 +37,7 @@ def splam_aggregator(db_name):
     os.makedirs(os.path.dirname(output_file), exist_ok=True)
 
     # make csv file if it does not exist, write to pd dataframe
-    if not os.path.exists(output_file):
+    if not os.path.exists(output_file) or overwrite:
         collect_splam(splam_score_file, db_name, output_file)
 
 '''Collect the Splam scores into a single dataframe'''
@@ -90,7 +90,7 @@ def collect_splam(score_file, db_name, output_file):
 #######################
 # RUN SPLICEAI PORTION
 #######################
-def spliceai_aggregator(TYPE, SPLICEAI_VERSION, db):
+def spliceai_aggregator(TYPE, SPLICEAI_VERSION, db, overwrite=False):
 
     # define identifiers for this run
     print('*'*140)
@@ -111,7 +111,7 @@ def spliceai_aggregator(TYPE, SPLICEAI_VERSION, db):
     os.makedirs(os.path.dirname(csv_path), exist_ok=True)
     
     # collect the full data into a dataframe
-    if not os.path.exists(csv_path):
+    if not os.path.exists(csv_path) or overwrite:
         score_df = collect_spliceai(d_score_file, a_score_file, donor_path, acceptor_path)
         full_df = index_compare(splam_data, name_file, score_df)
         write_df(full_df, csv_path)
@@ -158,9 +158,14 @@ def collect_spliceai(d_file, a_file, donor_path, acceptor_path):
     donor_df = pd.DataFrame(donors, dtype='float64')
     acceptor_df = pd.DataFrame(acceptors, dtype='float64')
 
+    # sanity check 
+    assert(len(score_df) == 25000)
+    assert(len(donor_df) == 25000)
+    assert(len(acceptor_df) == 25000)
+
     # save the donor and acceptor scores first
-    donor_df.to_csv(donor_path, sep='\t', header=None, index=0) 
-    acceptor_df.to_csv(acceptor_path, sep='\t', header=None, index=0) 
+    #donor_df.to_csv(donor_path, sep='\t', header=None, index=0) 
+    #acceptor_df.to_csv(acceptor_path, sep='\t', header=None, index=0) 
 
     # print results of score 
     print(f'Preview SpliceAI scores:\n{score_df}')
@@ -174,8 +179,11 @@ def index_compare(full_data_file, name_file, score_df):
 
     # read files and create dfs (df1 = SPLAM file; df2 = SpliceAI file w. scores)
     splam_full_df = pd.read_csv(full_data_file)
-    spliceai_name_df = pd.read_csv(name_file, delimiter=' ')
+    bed_names = ['chromosome', 'start', 'end', 'strand']
+    bed_types = {'chromosome': str, 'start': int, 'end': int, 'strand': str} 
+    spliceai_name_df = pd.read_csv(name_file, delimiter=' ', header=None, names=bed_names, dtype=bed_types)
 
+    # identify the dataframes to inner merge (df1 and df2)
     df1 = splam_full_df
     df2 = pd.concat([spliceai_name_df, score_df], axis=1)
     df2.columns = ['id', 'start', 'end', 'strand', 'd_score_spliceai', 'a_score_spliceai']
@@ -185,14 +193,16 @@ def index_compare(full_data_file, name_file, score_df):
     df1_rows = df1.iloc[:,:3].apply(tuple,axis=1)
     df2_rows = df2.iloc[:,:3].apply(tuple,axis=1)
     print(f'\t\tRows\tUniques\nSPLAM:\t\t{len(df1_rows)}\t{len(df1_rows.drop_duplicates())}\nSpliceAI:\t{len(df2_rows)}\t{len(df2_rows.drop_duplicates())}')
-    
+    df1.drop_duplicates(subset=['chrom', 'chromStart(donor)', 'chromEnd(acceptor)', 'strand'], inplace=True)
+
     # merge the two dataframes by ID, sort result, and drop duplicates 
     # NOTE: this will still keep some duplicate results as SpliceAI may give different scores to same sequence 
     filtered_df = df1.merge(df2, how='inner', left_on=['chrom', 'chromStart(donor)', 'chromEnd(acceptor)', 'strand'], 
-                            right_on=['id', 'start', 'end', 'strand'], sort=True).drop_duplicates()
+                            right_on=['id', 'start', 'end', 'strand'], sort=True)
+    
+    assert(len(filtered_df) == 25000)
 
     print(f'Merged rows: {len(filtered_df)}')
-
     print(f'Preview filtered SPLAM values:\n{filtered_df}')
     print('Finished filtering')
 
@@ -222,7 +232,7 @@ def write_df(full_df, csvpath):
 #######################
 # COMBINE BOTH PARTS
 #######################
-def combine(type, db):
+def combine(type, db, overwrite=False):
 
     # identifier
     id = [type, db]
@@ -231,7 +241,7 @@ def combine(type, db):
     # obtain the aggregated and averaged data from all 5 versions of spliceai and write to file
     agg_ofp = f'./6_output/combine/aggregate_data.{type}.{db}.csv'
     avg_ofp = f'./6_output/combine/averaged_data.{type}.{db}.csv'
-    if not os.path.exists(avg_ofp):
+    if not os.path.exists(avg_ofp) or overwrite:
         merge_df = aggregate_data(id)
         agg_df = get_counts(merge_df, id, agg_ofp)
         get_averages(agg_df, avg_ofp)
@@ -240,7 +250,7 @@ def combine(type, db):
 def aggregate_data(id):
 
     # define the df which will collect all scores together
-    aggregate_df = pd.DataFrame(columns=['seqid', 'start', 'end', 'name', 'expected_score', 'strand', 'd_dimer', 'a_dimer', 
+    aggregate_df = pd.DataFrame(columns=['index', 'seqid', 'start', 'end', 'name', 'expected_score', 'strand', 'd_dimer', 'a_dimer', 
                                             'd_score_splam', 'a_score_splam', 'd_score_spliceai', 'a_score_spliceai', 'spliceai_version'])
 
     # aggregate all versions of spliceai
@@ -250,18 +260,30 @@ def aggregate_data(id):
         ifp = f'./6_output/SpliceAI/{id[1]}/spliceai_data.v{version_num}.{id[0]}.{id[1]}.csv'
         full_df = pd.read_csv(ifp)
 
+        # sanity check
+        assert(len(full_df) == 25000)
+
         # add column indicating which version of the model data is from
         full_df['spliceai_version'] = version_num
+
+        # NOTE: for randomly generated negative samples, we need to account for potential duplicates, so we index the list (dups are removed in step 3 in new version)
+        full_df.reset_index(inplace=True)
 
         # concat onto aggregate df
         aggregate_df = pd.concat([aggregate_df, full_df], axis=0)
 
     # group the dataframe by common columns and aggregate the spliceai scores into a list
-    # NOTE: since there are duplicate sequences with different spliceai scores for a given file, there can be more than 5 scores in a merged list
-    merged_df = aggregate_df.groupby(['seqid', 'start', 'end', 'name', 'expected_score', 'strand', 'd_dimer', 'a_dimer', 
+    merged_df = aggregate_df.groupby(['index', 'seqid', 'start', 'end', 'name', 'expected_score', 'strand', 'd_dimer', 'a_dimer', 
                                       'd_score_splam', 'a_score_splam']).agg(lambda x: x.tolist()).reset_index()
+    merged_df.drop('index', axis=1, inplace=True)
 
     print(f'Preview merged_df:\n{merged_df}')
+    
+    # sanity check
+    assert(len(merged_df) == 25000)
+    for i, row in merged_df.iterrows():
+        assert(len(row['d_score_spliceai']) == 5)
+        assert(len(row['a_score_spliceai']) == 5)
 
     return merged_df
 
@@ -330,7 +352,7 @@ if __name__ == '__main__':
         os.chdir('/home/smao10/splam-analysis-results/benchmark/src_generalization_test/neg_test/')
 
     dbs = ['GRCm39', 'Mmul_10', 'NHGRI_mPanTro3', 'TAIR10']
-    nums = [0] # CHANGEME
+    nums = [0,1,2,3] # CHANGEME
 
     for num in nums:
         run_all(dbs[num])

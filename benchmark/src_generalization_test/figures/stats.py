@@ -19,8 +19,8 @@ def read_inputs(db):
     noN_neg_df['true_label'] = False
     print(len(noN_neg_df))
 
-    noN_pos_df = noN_pos_df.sample(n=9000, random_state=1091)
-    noN_neg_df = noN_neg_df.sample(n=9000, random_state=5802)
+    noN_pos_df = noN_pos_df.sample(n=25000, random_state=1091)
+    noN_neg_df = noN_neg_df.sample(n=25000, random_state=5802)
 
     noN_merge_df = pd.concat([noN_pos_df, noN_neg_df], axis=0)
 

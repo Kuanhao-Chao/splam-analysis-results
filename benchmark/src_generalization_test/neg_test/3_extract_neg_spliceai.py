@@ -93,7 +93,7 @@ def extract(df, seqs, chrs):
 
     # obtain a random sample (reproducible) for further analysis
     n = 25000
-    df = df.sample(n, random_state=3217)
+    df = df.drop_duplicates().sample(n, random_state=3217)
 
     return df
 
