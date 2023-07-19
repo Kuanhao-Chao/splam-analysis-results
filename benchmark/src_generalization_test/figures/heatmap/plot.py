@@ -50,7 +50,7 @@ def create_plot(df):
     score_types = df['Score_Type'].unique()
 
     # Create a 3x3 grid of subplots
-    fig, axes = plt.subplots(3, 3, figsize=(18, 14), sharex=True, sharey=True)
+    fig, axes = plt.subplots(3, 3, figsize=(18, 14), sharex=False, sharey=True)
 
     # Loop through each subplot and plot the heatmap
     for i, score_type in enumerate(score_types):
@@ -60,7 +60,7 @@ def create_plot(df):
             subset['Score'] *= 100
             heatmap_subset = subset.pivot(columns='Threshold', index='Model-Site', values='Score')
             print(heatmap_subset)
-            sns.heatmap(heatmap_subset, ax=ax, annot=True, cmap=sns.color_palette('flare', as_cmap=True), cbar=False, fmt='3.1f', vmin=14.3, vmax=100.0, xticklabels=['{:.2f}'.format(i) for i in reversed(thresholds)])
+            sns.heatmap(heatmap_subset, ax=ax, annot=True, cmap=sns.color_palette('flare', as_cmap=True), cbar=False, fmt='3.1f', vmin=10.0, vmax=100.0, xticklabels=['{:.2f}'.format(i) for i in reversed(thresholds)])
             #ax.set_title(f'{name} - {score_type}')
             ax.set_xlabel('')
             ax.set_ylabel('')
