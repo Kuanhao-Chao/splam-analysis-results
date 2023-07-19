@@ -8,7 +8,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import itertools
 import os
-threshold = 0.8
+threshold = 0.05
 
 ###### INPUT DATA #########
 def read_inputs(db):
@@ -103,10 +103,17 @@ def plot(df):
         # Show the legend
         plt.legend(title='Model')
         plt.yscale('log')
+<<<<<<< HEAD
 
          # Save the plot as an image file (PNG format)
         plt.savefig(f'./{threshold}/F1_Scores_{database}.png', bbox_inches='tight', dpi=300)
 
+=======
+
+        # Save the plot as an image file (PNG format)
+        plt.savefig(f'./{threshold:.1e}/F1_Scores_{database}.png', bbox_inches='tight', dpi=300)
+
+>>>>>>> d7daab751165c39eb2698e7e5cc6f3e274b78ebd
 
 
 ###### RUNNER ######
@@ -117,7 +124,7 @@ def run():
     models = ['splam', 'spliceai']
 
     # output
-    csv_path = f'./{threshold}/result.csv'
+    csv_path = f'./{threshold:.1e}/result.csv'
     os.makedirs(os.path.dirname(csv_path), exist_ok=True)
 
     # generate and print statistics
