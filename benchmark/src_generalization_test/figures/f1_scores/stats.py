@@ -8,17 +8,17 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import itertools
 import os
-threshold = 0.5
+threshold = 0.1
 
 ###### INPUT DATA #########
 def read_inputs(db):
     # positive
-    noN_pos_df = pd.read_csv(f'../pos_test/6_output/combine/averaged_data.noN.{db}.csv')
+    noN_pos_df = pd.read_csv(f'../../pos_test/6_output/combine/averaged_data.noN.{db}.csv')
     noN_pos_df['true_label'] = True
     print(len(noN_pos_df))
 
     # negative
-    noN_neg_df = pd.read_csv(f'../neg_test/6_output/combine/averaged_data.noN.{db}.csv')
+    noN_neg_df = pd.read_csv(f'../../neg_test/6_output/combine/averaged_data.noN.{db}.csv')
     noN_neg_df['true_label'] = False
     print(len(noN_neg_df))
 
@@ -48,17 +48,11 @@ def calculate_metrics(df, site, model):
             scores = df['a_score_splam']
         elif model == 'spliceai':
             scores = df['a_score_spliceai']
-    elif site == 'both':
+    elif site == 'junction': # take minimum between both sites
         if model == 'splam':
-            t1 = df['d_score_splam']
-            t2 = df['a_score_splam']
-            scores = pd.concat([t1, t2], axis=0)
-            true_labels = pd.concat([true_labels, true_labels], axis=0)
+            scores = df[['d_score_splam', 'a_score_splam']].min(axis=1)
         elif model == 'spliceai':
-            t1 = df['d_score_spliceai']
-            t2 = df['a_score_spliceai']
-            scores = pd.concat([t1, t2], axis=0)
-            true_labels = pd.concat([true_labels, true_labels], axis=0)
+            scores = df[['d_score_spliceai', 'a_score_spliceai']].min(axis=1)
 
     # Apply threshold to scores
     predicted_labels = scores >= threshold
@@ -119,7 +113,7 @@ def plot(df):
 def run():
 
     dbs = ["NHGRI_mPanTro3", "GRCm39", "TAIR10"]
-    sites = ['donor', 'acceptor', 'both']
+    sites = ['donor', 'acceptor', 'junction']
     models = ['splam', 'spliceai']
 
     # output
