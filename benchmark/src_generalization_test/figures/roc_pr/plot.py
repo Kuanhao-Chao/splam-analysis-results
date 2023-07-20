@@ -6,6 +6,8 @@ import pandas as pd
 from util import *
 from sklearn.metrics import auc, accuracy_score, confusion_matrix, roc_auc_score, roc_curve, precision_recall_curve, PrecisionRecallDisplay
 from sklearn import svm
+POS_NUM = 2500
+NEG_NUM = 25000
 
 def plot_pr_curve(true_y, y_prob, label, option):
     """
@@ -76,8 +78,6 @@ def main(db):
 
     mkdir = lambda p : os.makedirs(os.path.dirname(p), exist_ok=True)
 
-    POS_NUM = 25000
-    NEG_NUM = 25000
     #####################################
     # Declaring parameters for probability & prediction array
     #####################################
@@ -164,7 +164,7 @@ def main(db):
     #add legend to plot
     plt.legend([handles[idx] for idx in order],[labels[idx] for idx in order], fontsize=8)
     # plt.legend([splam_plt, spliceainoN_plt, spliceaiN_plt], [splam_label, spliceainoN_label, spliceaiN_label], fontsize=8)
-    path = f'./{db}_junc_pr_min_{POS_NUM}-{NEG_NUM}.png'
+    path = f'./{POS_NUM}-{NEG_NUM}/{db}_junc_pr_min.png'
     mkdir(path)
 
     plt.savefig(path, bbox_inches='tight', dpi=300)
@@ -192,7 +192,7 @@ def main(db):
     #add legend to plot
     plt.legend([handles[idx] for idx in order],[labels[idx] for idx in order], fontsize=8)
     # plt.legend([splam_plt, spliceainoN_plt, spliceaiN_plt], [splam_label, spliceainoN_label, spliceaiN_label], fontsize=8)
-    path = f'./{db}_junc_roc_min_{POS_NUM}-{NEG_NUM}.png'
+    path = f'./{POS_NUM}-{NEG_NUM}/{db}_junc_roc_min.png'
     mkdir(path)
     
     plt.savefig(path, bbox_inches='tight', dpi=300)

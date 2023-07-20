@@ -29,7 +29,7 @@ def main(db):
     # Declaring parameters for probability & prediction array
     #####################################
 
-    POS_NUM = 2500
+    POS_NUM = 25000
     NEG_NUM = 25000
 
     ### noN ###
@@ -100,13 +100,13 @@ def main(db):
     #####################################
 
     # generate some sample data for predict probabilities and true labels
-    path = f'./{db}_DT_plot_spliceai_noN_{POS_NUM}-{NEG_NUM}.png'
+    path = f'./{POS_NUM}-{NEG_NUM}/{db}_DT_plot_spliceai_noN.png'
     predict_probabilities = np.minimum(spliceai_noN_d_pred, spliceai_noN_a_pred)
     true_labels = spliceai_noN_a_label
     plot_DT_plot(true_labels, predict_probabilities, path)
 
     # generate some sample data for predict probabilities and true labels
-    path = f'./{db}_DT_plot_splam_{POS_NUM}-{NEG_NUM}.png'
+    path = f'./{POS_NUM}-{NEG_NUM}/{db}_DT_plot_splam.png'
     predict_probabilities = np.minimum(splam_d_pred,splam_a_pred)
     true_labels = splam_d_label
     plot_DT_plot(true_labels, predict_probabilities, path)
