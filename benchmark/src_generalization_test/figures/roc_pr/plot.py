@@ -99,9 +99,6 @@ def main(db):
     print("noN_pos_df: ", len(noN_pos_df))
     print("noN_neg_df: ", len(noN_neg_df))
     print("noN_merge_df: ", len(noN_merge_df))
-
-
-    
     
     ### N ###
     # positive
@@ -167,7 +164,7 @@ def main(db):
     #add legend to plot
     plt.legend([handles[idx] for idx in order],[labels[idx] for idx in order], fontsize=8)
     # plt.legend([splam_plt, spliceainoN_plt, spliceaiN_plt], [splam_label, spliceainoN_label, spliceaiN_label], fontsize=8)
-    path = f'./{db}_junc_pr_min.png'
+    path = f'./{db}_junc_pr_min_{POS_NUM}-{NEG_NUM}.png'
     mkdir(path)
 
     plt.savefig(path, bbox_inches='tight', dpi=300)
@@ -195,7 +192,7 @@ def main(db):
     #add legend to plot
     plt.legend([handles[idx] for idx in order],[labels[idx] for idx in order], fontsize=8)
     # plt.legend([splam_plt, spliceainoN_plt, spliceaiN_plt], [splam_label, spliceainoN_label, spliceaiN_label], fontsize=8)
-    path = f'./{db}_junc_roc_min.png'
+    path = f'./{db}_junc_roc_min_{POS_NUM}-{NEG_NUM}.png'
     mkdir(path)
     
     plt.savefig(path, bbox_inches='tight', dpi=300)

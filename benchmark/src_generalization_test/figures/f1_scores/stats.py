@@ -103,17 +103,10 @@ def plot(df):
         # Show the legend
         plt.legend(title='Model')
         plt.yscale('log')
-<<<<<<< HEAD
 
          # Save the plot as an image file (PNG format)
         plt.savefig(f'./{threshold}/F1_Scores_{database}.png', bbox_inches='tight', dpi=300)
 
-=======
-
-        # Save the plot as an image file (PNG format)
-        plt.savefig(f'./{threshold:.1e}/F1_Scores_{database}.png', bbox_inches='tight', dpi=300)
-
->>>>>>> d7daab751165c39eb2698e7e5cc6f3e274b78ebd
 
 
 ###### RUNNER ######
