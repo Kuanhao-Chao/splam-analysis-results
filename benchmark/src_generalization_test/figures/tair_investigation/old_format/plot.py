@@ -8,14 +8,12 @@ import os
 
 def run_plotter(type):
 
-    # # obtain the averaged data from POSITIVE sample
-    # for db in ['GRCm39', 'Mmul_10', 'NHGRI_mPanTro3', 'TAIR10']:
-    #     avg_df = pd.read_csv(f'../../pos_test/6_output/combine/averaged_data.{type}.{db}.csv')
-    #     avg_df = revive_list(avg_df, ['spliceai_version'], ['int'])
-    #     get_stats(avg_df, type, db)
+    # obtain the averaged data from POSITIVE sample
+    for db in ['GRCm39', 'Mmul_10', 'NHGRI_mPanTro3', 'TAIR10']:
+        avg_df = pd.read_csv(f'../../pos_test/6_output/combine/averaged_data.{type}.{db}.csv')
+        avg_df = revive_list(avg_df, ['spliceai_version'], ['int'])
+        get_stats(avg_df, type, db)
 
-    # plot the TAIR intron length vs. score plots
-    db = 'TAIR10'
     avg_df = pd.read_csv(f'../../pos_test/6_output/combine/averaged_data.{type}.TAIR10.csv')
     avg_df = revive_list(avg_df, ['spliceai_version'], ['int'])
     tair(avg_df, type, db)
@@ -110,10 +108,10 @@ def tair(avg_df, type, db):
     df['N Content'] = df['N Content'] / (df['Intron Length'] + 10400)
 
 
-    d_df = pd.melt(df, value_vars=['d_score_splam', 'd_score_spliceai'], var_name='Method', value_name='Score', 
-                   id_vars=['N Content', 'Intron Length', 'Distance to Ending']).replace('d_score_spliceai', 'SpliceAI').replace('d_score_splam', 'Splam')
-    a_df = pd.melt(df, value_vars=['a_score_splam', 'a_score_spliceai'], var_name='Method', value_name='Score', 
-                   id_vars=['N Content', 'Intron Length', 'Distance to Ending']).replace('a_score_spliceai', 'SpliceAI').replace('a_score_splam', 'Splam')
+    d_df = pd.melt(df, value_vars=['d_score_spliceai', 'd_score_splam'], var_name='Method', value_name='Score', 
+                   id_vars=['N Content', 'Intron Length', 'Distance to Ending']).replace('d_score_spliceai', 'SpliceAI').replace('d_score_splam', 'SPLAM')
+    a_df = pd.melt(df, value_vars=['a_score_spliceai', 'a_score_splam'], var_name='Method', value_name='Score', 
+                   id_vars=['N Content', 'Intron Length', 'Distance to Ending']).replace('a_score_spliceai', 'SpliceAI').replace('a_score_splam', 'SPLAM')
     print('Donor and Acceptor Stats\n\n', d_df, '\n', a_df)
 
     # investigating intron len specifically lower end
@@ -133,16 +131,9 @@ def tair(avg_df, type, db):
                 df = df[df['Intron Length'] < threshold]
                 disc = '<'
 
-            # perform shuffle for uniformity
-            first_row = df.iloc[0:1]
-            shuffle = df.iloc[1:].sample(frac=1, random_state=42)
-            df = pd.concat([first_row, shuffle])
-
-            colors = ["#2ca02c", "#ff7f0e"]
             sns.set(font_scale=0.8)
-            sns.set_palette(sns.color_palette(colors))
-        
-            plot_params = {'s': 8, 'alpha': 0.4}
+            sns.set_palette('deep')
+            plot_params = {'s': 8, 'alpha': 0.6}
             sns.jointplot(data=df, x='Intron Length', y='Score', hue='Method', height=8, ratio=4, **plot_params)
             plt.title(f'{site} Intron Length ({disc}400) vs. Score for {db} Dataset')
             save_fig(f'./{site}{disc}{threshold}_jointplot_len_vs_score.{type}.{db}.png')
