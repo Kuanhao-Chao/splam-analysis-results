@@ -79,7 +79,7 @@ def calculate_metrics(df, site, model):
 
 ###### VISUALIZE #######
 def plot(df):
-    
+
     # Set the plot style
     sns.set(style="whitegrid")
 
@@ -90,23 +90,30 @@ def plot(df):
     for database in databases:
         # Filter the DataFrame for the current database
         df_database = df[df['Database'] == database]
-        
+
         # Plot using seaborn
         plt.figure(figsize=(8, 5))
         sns.barplot(x='Site', y='F1_Score', hue='Model', data=df_database, palette='Set2')
-        
+
         # Set plot title and labels
         plt.title(f'F1 Scores for {database}')
         plt.xlabel('Site')
         plt.ylabel('F1 Score')
-        
+
         # Show the legend
         plt.legend(title='Model')
         plt.yscale('log')
-        
+<<<<<<< HEAD
+
+         # Save the plot as an image file (PNG format)
+        plt.savefig(f'./{threshold}/F1_Scores_{database}.png', bbox_inches='tight', dpi=300)
+
+=======
+
         # Save the plot as an image file (PNG format)
         plt.savefig(f'./{threshold:.1e}/F1_Scores_{database}.png', bbox_inches='tight', dpi=300)
-    
+
+>>>>>>> d7daab751165c39eb2698e7e5cc6f3e274b78ebd
 
 
 ###### RUNNER ######
@@ -132,7 +139,7 @@ def run():
                 print(f'\tSensitivity: {sensitivity}\n\tSpecificity: {specificity}\n\tPrecision: {precision}\n\tNPV: {npv}\n\tAccuracy: {accuracy}\n\tF1 Score: {f1_score}\n')
 
                 f.write(f'{db},{site},{model},{sensitivity},{specificity},{precision},{npv},{accuracy},{f1_score}\n')
-    
+
     # create plot
     print('Plotting figure...')
     stats = pd.read_csv(csv_path)
