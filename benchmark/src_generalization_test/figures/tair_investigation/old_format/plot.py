@@ -115,7 +115,7 @@ def tair(avg_df, type, db):
     print('Donor and Acceptor Stats\n\n', d_df, '\n', a_df)
 
     # investigating intron len specifically lower end
-    threshold = 400
+    threshold = 200
     for above in [True, False]:
         for donor in [True, False]:
             if donor:
