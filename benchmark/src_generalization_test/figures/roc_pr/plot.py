@@ -6,7 +6,7 @@ import pandas as pd
 from util import *
 from sklearn.metrics import auc, accuracy_score, confusion_matrix, roc_auc_score, roc_curve, precision_recall_curve, PrecisionRecallDisplay
 from sklearn import svm
-POS_NUM = 2500
+POS_NUM = 250
 NEG_NUM = 25000
 
 def plot_pr_curve(true_y, y_prob, label, option):

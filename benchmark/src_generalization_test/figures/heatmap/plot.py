@@ -6,7 +6,7 @@ import os
 import itertools
 thresholds = [0.95, 0.80, 0.65, 0.50, 0.35, 0.20, 0.05]
 db_names = {'GRCm39':'Mouse', 'NHGRI_mPanTro3':'Chimpanzee', 'TAIR10':'Arabidopsis'}
-POS_NUM = 12500
+POS_NUM = 250
 NEG_NUM = 25000
 
 def handle_duplicate_names(path):
