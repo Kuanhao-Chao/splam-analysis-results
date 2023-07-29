@@ -2,13 +2,13 @@
 all the scripts to reproduce the results in the splam paper
 
 
-## Generalization Tests:
+## Generalization Tests
 `benchmark/src_generalization_test/`
 
 - all outputs from every step of the data processing will be saved in the corresponding folder of the step `{#}_output/`
 - `{name}` refers to the name of the gene database
 
-## Generate and pre-process the data:
+### Part 1: Generating and pre-processing the data
 
 1. Positive Dataset
 
@@ -26,7 +26,7 @@ all the scripts to reproduce the results in the splam paper
 
         Outputs:
         - `databases/{name}.db` = sqlite3-style databases parsed from the `.gff` annotation files
-        - `{name}_introns.bed` = protein-coding genes
+        - `{name}_introns.bed` = extracted introns
     
     2. Extract all the sequences from the introns, with the tailored specifications of Splam. This step also performs checks and filters to ensure high quality positive data.
 
@@ -56,8 +56,6 @@ all the scripts to reproduce the results in the splam paper
         - `coords.bed` = bed file referring to the start and end positions of the *whole* SpliceAI input
         - `seq_noN.fa` = fasta file containing the SpliceAI input, with the full flanking sequence (coords refer to splice junction)
         - `seq_N.fa` = fasta file containing the SpliceAI input, with repeating N flanking sequence (coords refer to splice junction)
-
-
 
 
 2. Negative Dataset
@@ -108,7 +106,7 @@ all the scripts to reproduce the results in the splam paper
         - `seq_N.fa` = fasta file containing the SpliceAI input, with repeating N flanking sequence (coords refer to splice junction)
 
 
-## Run Splam and SpliceAI on the processed transcripts, and record the scores
+### Part 2: Running Splam and SpliceAI 
 
 Run the following three steps in both folders of the pipeline. They are essentially the same for both positive and negative datasets.
 
@@ -156,7 +154,7 @@ Run the following three steps in both folders of the pipeline. They are essentia
     - `combine/averaged_data.noN.{name}.csv`, `combine/averaged_data.N.{name}.csv` = averaged list across the 5 models, most interfaceable form
 
 
-## Plotting Results:
+### Part 3: Plotting Results
 
 Navigate to the `figures/` folder. Here, you have a subdirectory for every figure we generated. Simply navigate to the figure you want, and run the `plot.py` function.
 
