@@ -60,6 +60,7 @@ __pycache__/
 splam.egg-info/
 dist/
 build/
+private/
 *.gff
 *.gff3
 *.db
