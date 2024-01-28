@@ -34,7 +34,7 @@ def main():
     MANE_OR_ALTS = "ALTS"
     for SPLICEAI_VERSION in ["1", "2", "3", "4", "5", "AVERAGE"]:
 
-        # with open("../../src_tools_evaluation/spliceai_result_"+SPLICEAI_VERSION+"/spliceai.da.N.merged.BOTH.pkl", "rb") as fr:
+        # with open("../../src_tools_evaluation/spliceai_result_"+SPLICEAI_VERSION+"/spliceai.da.N.merged.FULL.pkl", "rb") as fr:
         #     spliceai_N_d_label = pickle.load(fr)
         #     spliceai_N_d_pred = pickle.load(fr)
         #     spliceai_N_a_label = pickle.load(fr)
@@ -54,7 +54,7 @@ def main():
         #     print("\tspliceai_N_a_pred: ", spliceai_N_a_pred)
         #     print("")
 
-        with open("../../src_tools_evaluation/spliceai_result_"+SPLICEAI_VERSION+"/spliceai.da.noN.merged.BOTH.pkl", "rb") as fr:
+        with open("../../src_tools_evaluation/spliceai_result_"+SPLICEAI_VERSION+"/spliceai.da.noN.merged.FULL.pkl", "rb") as fr:
             spliceai_noN_d_label = pickle.load(fr)
             spliceai_noN_d_pred = pickle.load(fr)
             spliceai_noN_a_label = pickle.load(fr)
@@ -86,7 +86,7 @@ def main():
             true_labels = spliceai_noN_a_label
             plot_DT_plot(true_labels, predict_probabilities, SPLAM_VERSION, "spliceai_noN", SPLICEAI_VERSION)
 
-            with open("../../src_tools_evaluation/splam_result/"+SPLAM_VERSION+"/splam.da.noshuffle.merged.BOTH.pkl",'rb') as f:
+            with open("../../src_tools_evaluation/splam_result/"+SPLAM_VERSION+"/splam.da.noshuffle.merged.FULL.pkl",'rb') as f:
                 splam_d_label = pickle.load(f)
                 splam_d_pred = pickle.load(f)
                 splam_a_label = pickle.load(f)
