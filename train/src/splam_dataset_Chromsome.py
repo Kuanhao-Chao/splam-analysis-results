@@ -25,11 +25,10 @@ class myDataset(Dataset):
             neg_1_f = "./INPUTS/"+SEQ_LEN+"bp/input_neg_1/"+type+"_neg_1.shuffle.fa"
             neg_random_f = "./INPUTS/"+SEQ_LEN+"bp/input_neg_random/"+type+"_neg_random.shuffle.fa"
         elif type == "eval":
-            pos_f = "../src_tools_evaluation/dataset/pos/splam/splam.juncs.seq.fa"
-            pos_MANE_f = "../src_tools_evaluation/dataset/pos_MANE/splam/splam.juncs.seq.fa"
-            pos_ALTS_f = "../src_tools_evaluation/dataset/pos_ALTS/splam/splam.juncs.seq.fa"
-            neg_1_f = "../src_tools_evaluation/dataset/neg_1/splam/splam.juncs.seq.fa"
-            neg_random_f = "../src_tools_evaluation/dataset/neg_random/splam/splam.juncs.seq.fa"
+            pos_MANE_f = "./INPUTS/"+SEQ_LEN+"bp/input_pos_MANE/test_pos_MANE.shuffle.fa"
+            pos_ALTS_f = "./INPUTS/"+SEQ_LEN+"bp/input_pos_ALTS/test_pos_ALTS.shuffle.fa"
+            neg_1_f = "./INPUTS/"+SEQ_LEN+"bp/input_neg_1/test_neg_1.shuffle.fa"
+            neg_random_f = "./INPUTS/"+SEQ_LEN+"bp/input_neg_random/test_neg_random.shuffle.fa"
 
         # CONSTANT_SIZE = 5000
         # CONSTANT_SIZE_NEG = 5000

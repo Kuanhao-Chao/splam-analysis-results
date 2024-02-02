@@ -4,7 +4,7 @@ import json
 import torch
 
 def chr_name_convert():
-    f_chrs = open("../../Dataset/Refseq_2_UCSU_chromosome_names.tsv", "r")
+    f_chrs = open("../../../Dataset/Refseq_2_UCSU_chromosome_names.tsv", "r")
     lines = f_chrs.read().splitlines()
     chrs = {}
     for line in lines:
@@ -18,7 +18,7 @@ def main():
     os.makedirs("./REF_junctions/", exist_ok=True)
     fw = open("./REF_junctions/ref_d_a.bed", 'w')
     chrs = chr_name_convert()
-    with open("../../Dataset/refseq_GCF_000001405.40_GRCh38.p14_genomic.gff", 'r') as f:
+    with open("../../../Dataset/refseq_GCF_000001405.40_GRCh38.p14_genomic.gff", 'r') as f:
         lists = f.read().splitlines() 
         transcript_id = ""
         prev_transcript_id = ""
