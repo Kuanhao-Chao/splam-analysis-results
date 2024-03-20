@@ -1,6 +1,7 @@
 SEQ_LEN=800
-mkdir ./BAM_REF_Intersection/${SEQ_LEN}bp
+project_root=/ccb/cybertron/khchao/splam-analysis-results/
+output_dir=${project_root}train/results/RefSeq_ALTS/BAM_REF_Intersection/${SEQ_LEN}bp/100_juncs/
 
-bedtools getfasta -s -fi ../../Dataset/hg38_p12_ucsc.no_alts.no_fixs.fa -bed ./BAM_REF_Intersection/${SEQ_LEN}bp/100_juncs/donor.bed -fo ./BAM_REF_Intersection/${SEQ_LEN}bp/100_juncs/donor_seq.fa
+bedtools getfasta -s -fi ${project_root}Dataset/hg38_p12_ucsc.no_alts.no_fixs.fa -bed ${output_dir}donor.bed -fo ${output_dir}donor_seq.fa
 
-bedtools getfasta -s -fi ../../Dataset/hg38_p12_ucsc.no_alts.no_fixs.fa -bed ./BAM_REF_Intersection/${SEQ_LEN}bp/100_juncs/acceptor.bed -fo ./BAM_REF_Intersection/${SEQ_LEN}bp/100_juncs/acceptor_seq.fa
+bedtools getfasta -s -fi ${project_root}Dataset/hg38_p12_ucsc.no_alts.no_fixs.fa -bed ${output_dir}acceptor.bed -fo ${output_dir}acceptor_seq.fa

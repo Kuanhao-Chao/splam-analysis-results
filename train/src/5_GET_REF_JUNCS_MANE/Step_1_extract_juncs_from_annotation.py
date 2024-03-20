@@ -3,11 +3,14 @@ import re
 import json 
 import torch
 
+project_root = '/ccb/cybertron/khchao/splam-analysis-results/' 
+output_dir = f'{project_root}train/results/MANE/REF_junctions/'
+
 def main():
     JUNC_COUNTER = 0
-    os.makedirs("./REF_junctions/", exist_ok=True)
-    fw = open("./REF_junctions/ref_d_a.bed", 'w')
-    with open("../../../Dataset/MANE.GRCh38.v1.0.ensembl_genomic.gff", 'r') as f:
+    os.makedirs(output_dir, exist_ok=True)
+    fw = open(f'{output_dir}ref_d_a.bed', 'w')
+    with open(f'{project_root}Dataset/MANE.GRCh38.v1.0.refseq_genomic.gff', 'r') as f:
         lists = f.read().splitlines() 
         transcript_id = ""
         prev_transcript_id = ""
@@ -21,7 +24,6 @@ def main():
             line = line.split("\t")
             if len(line) < 8:
                 continue
-
             if (line[2] == "exon"):
                 match = re.search(r"transcript_id=\w+", line[8])
                 if match is not None:
