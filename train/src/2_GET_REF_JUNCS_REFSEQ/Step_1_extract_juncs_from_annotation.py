@@ -17,8 +17,9 @@ def chr_name_convert():
 
 def main():
     JUNC_COUNTER = 0
+    extracted_junc_type = "all"
     os.makedirs(output_dir, exist_ok=True)
-    fw = open(f'{output_dir}ref_d_a.bed', 'w')
+    fw = open(f'{output_dir}ref_d_a_{extracted_junc_type}.bed', 'w')
     chrs = chr_name_convert()
     with open(f'{project_root}/Dataset/refseq_GCF_000001405.40_GRCh38.p14_genomic.gff', 'r') as f:
         lists = f.read().splitlines() 
@@ -36,7 +37,10 @@ def main():
             if len(line) < 8:
                 continue
             if (line[2] == "gene"):
-                match_prot = re.search(r"gene_biotype=protein_coding", line[8])
+                if extracted_junc_type == "all":
+                    match_prot = re.search(r"gene_biotype=(protein_coding|lncRNA|ncRNA|nc_RNA)", line[8])
+                else:
+                    match_prot = re.search(r"gene_biotype=protein_coding", line[8])
                 if match_prot is not None:
                     is_protein_entries = True
                 else:

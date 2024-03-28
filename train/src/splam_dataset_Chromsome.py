@@ -16,19 +16,18 @@ def split_seq_name(seq):
 
 
 class myDatasetEval(Dataset):
-    def __init__(self, type, segment_len=800, shuffle=True, eval_select=None, idx=0):
+    def __init__(self, type, segment_len=800, shuffle=True, eval_select=None, test_f=""):
         print("!!shuffle: ", shuffle, eval_select)
         self.segment_len = segment_len
         self.data = []
-        neg_f = f'{project_root}train/results/Negs/Neg_{idx}/INPUTS/800bp/input_neg_{idx}.fa'
         CONSTANT_SIZE_NEG = 10000
         if type == "eval":
             #################################
             ## Processing 'NEGATIVE_1' samples
             #################################
             nidx = 0
-            with open(neg_f, "r") as f:
-                print("Processing ", neg_f)
+            with open(test_f, "r") as f:
+                print("Processing ", test_f)
                 lines = f.read().splitlines()
                 seq_name = ""
                 seq = ""
@@ -41,7 +40,6 @@ class myDatasetEval(Dataset):
                         X = torch.Tensor(np.array(X))
                         Y = torch.Tensor(np.array(Y)[0])
                         if X.size()[0] != 800:
-                            print("seq_name: ", seq_name)
                             print(X.size())
                             print(Y.size())
                         self.data.append([X, Y, seq_name])
@@ -83,7 +81,7 @@ class myDatasetTrain(Dataset):
         #     pos_ALTS_f = "./INPUTS/"+SEQ_LEN+"bp/input_pos_ALTS/test_pos_ALTS.shuffle.fa"
         #     neg_1_f = "./INPUTS/"+SEQ_LEN+"bp/input_neg_1/test_neg_1.shuffle.fa"
         #     neg_random_f = "./INPUTS/"+SEQ_LEN+"bp/input_neg_random/test_neg_random.shuffle.fa"
-        #     neg_f = f'/ccb/cybertron/khchao/splam-analysis-results/train/results/Negs/Neg_{idx}/INPUTS/800bp/input_neg_{idx}.fa'
+        #     test_f = f'/ccb/cybertron/khchao/splam-analysis-results/train/results/Negs/Neg_{idx}/INPUTS/800bp/input_neg_{idx}.fa'
 
         CONSTANT_SIZE_NEG = 10000
         
@@ -329,11 +327,11 @@ def get_test_dataloader(batch_size, TARGET, n_workers, shuffle):
     # test_loader = torch.load("./INPUTS/"+SEQ_LEN+"bp/"+TARGET+"/test.pt")
     return test_loader
 
-def get_eval_dataloader(batch_size, TARGET, n_workers, shuffle, eval_select, idx):
+def get_eval_dataloader(batch_size, TARGET, n_workers, shuffle, eval_select, test_f):
     #######################################
     # predicting splice / non-splice
     #######################################
-    testset = myDatasetEval("eval", int(SEQ_LEN), shuffle, eval_select, idx)
+    testset = myDatasetEval("eval", int(SEQ_LEN), shuffle, eval_select, test_f)
     test_loader = DataLoader(
         testset,
         batch_size = batch_size,
@@ -341,7 +339,8 @@ def get_eval_dataloader(batch_size, TARGET, n_workers, shuffle, eval_select, idx
         drop_last = False,
         pin_memory = True,
     )
-    print(f'[INFO] Loading dataset (shuffle: /ccb/cybertron/khchao/splam-analysis-results/src_tools_evaluation/splam_result/{TARGET}/neg_{idx}/neg_{idx}.splam_dataloader.pt')
-    torch.save(test_loader, f'/ccb/cybertron/khchao/splam-analysis-results/src_tools_evaluation/splam_result/{TARGET}/neg_{idx}/neg_{idx}.splam_dataloader.pt')
+    dataLoader = os.path.join(os.path.dirname(test_f), "splam_dataloader.pt")
+    print(f'[INFO] Loading dataset (shuffle: {test_f}')
+    torch.save(test_loader, f'{dataLoader}')
     return test_loader
 

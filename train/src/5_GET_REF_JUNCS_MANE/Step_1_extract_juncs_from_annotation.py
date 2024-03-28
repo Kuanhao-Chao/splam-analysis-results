@@ -34,23 +34,18 @@ def main():
                     exon_end = int(line[4])
                     print("transcript_id: ", transcript_id)
                     if prev_transcript_id != transcript_id:
-
                         if prev_strand == '-':
                             starts.reverse()    
                             ends.reverse()
-                        
                         starts = starts[1:]
                         ends = ends[:-1]
-
                         for idx in range(len(starts)):
                             JUNC_COUNTER += 1
                             fw.write(prev_chr + "\t" + str(ends[idx]) + "\t" + str(starts[idx]) + "\t" + "JUNC" + "\t1\t" + prev_strand + "\n")
-                            
                         starts.clear()
                         ends.clear()
                     starts.append(exon_start)
                     ends.append(exon_end)
-
                     prev_transcript_id = transcript_id
                     prev_chr = chr
                     prev_strand = strand
