@@ -78,7 +78,7 @@ plt.ylabel('Splam Acceptor Score')
 
 # Show plots
 plt.tight_layout()
-plt.savefig('/ccb/cybertron/khchao/splam-analysis-results/results/eval_test_chromosome/figure_spliceai_vs_splam_scores_colored.png')
+plt.savefig('/ccb/cybertron/khchao/splam-analysis-results/results/eval_test_chromosome/figure_spliceai_vs_splam_scores_colored.png', dpi=300)
 plt.clf()
 
 # Create scatter plots for SpliceAI and Splam scores comparison
@@ -106,5 +106,5 @@ plt.ylabel('Splam Acceptor Score')
 
 # Show plots
 plt.tight_layout()
-plt.savefig('/ccb/cybertron/khchao/splam-analysis-results/results/eval_test_chromosome/figure_donor_vs_acceptor_colored.png')
+plt.savefig('/ccb/cybertron/khchao/splam-analysis-results/results/eval_test_chromosome/figure_donor_vs_acceptor_colored.png', dpi=300)
 plt.clf()

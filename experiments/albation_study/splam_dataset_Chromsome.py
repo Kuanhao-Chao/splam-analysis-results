@@ -80,7 +80,7 @@ class myDatasetTrain(Dataset):
             pos_ALTS_f = f'{project_root}/train/results/train_test_dataset/input_pos_alts/test_pos_alts.shuffle.fa'
             neg_1_f = f'{project_root}/train/results/train_test_dataset/input_neg_1/test_neg_1.shuffle.fa'
             neg_random_f = f'{project_root}/train/results/train_test_dataset/input_neg_random/test_neg_random.shuffle.fa'
-        CONSTANT_SIZE = 1000
+        CONSTANT_SIZE_NEG = 0
         #################################
         ## Processing 'Positive_MANE' samples
         #################################
@@ -91,17 +91,13 @@ class myDatasetTrain(Dataset):
             seq_name = ""
             seq = ""
             for line in lines:
-                # print(line)
                 if pp_MANE_idx % 2 == 0:
                     seq_name = split_seq_name(line)
                 elif pp_MANE_idx % 2 == 1:
                     seq = line
-                    # print(seq)
                     X, Y = create_datapoints(seq, '+')
                     X = torch.Tensor(np.array(X))
                     Y = torch.Tensor(np.array(Y)[0])
-                    # print("X.size(): ", X)
-                    # print("Y.size(): ", Y)
                     if X.size()[0] != 800:
                         print("seq_name: ", seq_name)
                         print(X.size())
@@ -110,8 +106,6 @@ class myDatasetTrain(Dataset):
                 pp_MANE_idx += 1
                 if pp_MANE_idx %10000 == 0:
                     print("\tpp_MANE_idx: ", pp_MANE_idx)
-                if pp_MANE_idx >= CONSTANT_SIZE:
-                    break
         print("\tpp_MANE_idx: ", pp_MANE_idx)
         #################################
         ## Processing 'Positive_ALTS' samples
@@ -123,17 +117,13 @@ class myDatasetTrain(Dataset):
             seq_name = ""
             seq = ""
             for line in lines:
-                # print(line)
                 if pp_alts_idx % 2 == 0:
                     seq_name = split_seq_name(line)
                 elif pp_alts_idx % 2 == 1:
                     seq = line
-                    # print(seq)
                     X, Y = create_datapoints(seq, '+')
                     X = torch.Tensor(np.array(X))
                     Y = torch.Tensor(np.array(Y)[0])
-                    # print("X.size(): ", X)
-                    # print("Y.size(): ", Y)
                     if X.size()[0] != 800:
                         print("seq_name: ", seq_name)
                         print(X.size())
@@ -142,9 +132,9 @@ class myDatasetTrain(Dataset):
                 pp_alts_idx += 1
                 if pp_alts_idx %10000 == 0:
                     print("\tpp_alts_idx: ", pp_alts_idx)
-                if pp_alts_idx >= CONSTANT_SIZE:
-                    break
         print("\tpp_alts_idx: ", pp_alts_idx)
+        CONSTANT_SIZE_NEG = (pp_MANE_idx+pp_alts_idx) 
+        print("CONSTANT_SIZE_NEG: ", CONSTANT_SIZE_NEG)
         #################################
         ## Processing 'NEGATIVE_1' samples
         #################################
@@ -171,7 +161,7 @@ class myDatasetTrain(Dataset):
                 n1idx += 1
                 if n1idx %10000 == 0:
                     print("\tn1idx: ", n1idx)
-                if n1idx >= CONSTANT_SIZE:
+                if n1idx >= CONSTANT_SIZE_NEG:
                     break
         print("\tn1idx: ", n1idx)
         #################################
@@ -184,12 +174,10 @@ class myDatasetTrain(Dataset):
             seq_name = ""
             seq = ""
             for line in lines:
-                # print(line)
                 if nridx % 2 == 0:
                     seq_name = split_seq_name(line)
                 elif nridx % 2 == 1:
                     seq = line
-                    # print(seq)
                     X, Y = create_datapoints(seq, '-')
                     X = torch.Tensor(np.array(X))
                     Y = torch.Tensor(np.array(Y)[0])
@@ -201,7 +189,7 @@ class myDatasetTrain(Dataset):
                 nridx += 1
                 if nridx %10000 == 0:
                     print("\tnridx: ", nridx)
-                if nridx >= CONSTANT_SIZE:
+                if nridx >= CONSTANT_SIZE_NEG:
                     break
         print("\tnridx: ", nridx)
         #################################

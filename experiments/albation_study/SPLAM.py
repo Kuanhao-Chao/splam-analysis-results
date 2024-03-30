@@ -34,18 +34,20 @@ class Skip(Module):
 
 
 class SPLAM(Module):
-    def __init__(self, L=64, W=np.array([11]*8+[21]*4+[41]*4), AR=np.array([1]*4+[4]*4+[10]*4+[25]*4)):
+    def __init__(self, L=64, W=np.array([11]*12+[21]*8), AR=np.array([1]*4+[5]*4+[10]*4+[15]*4+[20]*4), rsb=4):
         super().__init__()
         self.CL = 2 * (AR * (W - 1)).sum()  # context length
         self.conv1 = Conv1d(4, L, 1)
         self.skip1 = Skip(L)
         self.residual_blocks = ModuleList()
+        
         for i, (w, r) in enumerate(zip(W, AR)):
             self.residual_blocks.append(ResidualUnit(L, w, r))
-            if (i+1) % 4 == 0:
+            if (i+1) % rsb == 0:
                 self.residual_blocks.append(Skip(L))
-        if (len(W)+1) % 4 != 0:
+        if (len(W)+1) % rsb != 0:
             self.residual_blocks.append(Skip(L))
+
         self.last_cov = Conv1d(L, 3, 1)
         self.softmax = Softmax(dim=1)
 
