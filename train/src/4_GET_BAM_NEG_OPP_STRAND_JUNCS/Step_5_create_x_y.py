@@ -1,15 +1,17 @@
 import os
+import sys
 
 project_root = '/ccb/cybertron/khchao/splam-analysis-results/' 
 
 def main():
-    SEQ_LEN = "800"
+    SEQ_LEN = sys.argv[1]
     HALF_SEQ_LEN = int(SEQ_LEN) // 2
     QUATER_SEQ_LEN = int(SEQ_LEN) // 4
     
-    for threshold in range(2, 101):
-        input_file_dir = f'{project_root}train/results/Negs/Neg_{threshold}/Select_junctions/'
-        output_dir = f'{project_root}train/results/Negs/Neg_{threshold}/INPUTS/'
+    # for threshold in range(2, 101):
+    for threshold in range(1, 2):
+        input_file_dir = f'{project_root}train/results/Neg_{threshold}/Select_junctions/'
+        output_dir = f'{project_root}train/results/Neg_{threshold}/INPUTS/'
         os.makedirs(f'{output_dir}{SEQ_LEN}bp/', exist_ok=True)
         fw = open(f'{output_dir}{SEQ_LEN}bp/input_neg_{threshold}.fa', "w")
         fr_donor = open(f'{input_file_dir}{SEQ_LEN}bp/{threshold}_juncs/donor_seq.fa', "r")

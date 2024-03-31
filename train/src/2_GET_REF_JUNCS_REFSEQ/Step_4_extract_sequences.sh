@@ -1,4 +1,4 @@
-SEQ_LEN=800
+SEQ_LEN=$1
 project_root=/ccb/cybertron/khchao/splam-analysis-results/
 output_dir=${project_root}train/results/ALL_RefSeq/BAM_REF_Intersection/${SEQ_LEN}bp/100_juncs/
 

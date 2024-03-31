@@ -1,5 +1,6 @@
 import pandas as pd
 import os 
+import sys
 
 def get_hg38_chrom_size():
     f_chrs = open("../hg38_chrom_size.tsv", "r")
@@ -13,7 +14,7 @@ def get_hg38_chrom_size():
 def main():
     chrs = get_hg38_chrom_size()
     JUNC_POSITIONS = set()
-    SEQ_LEN = "800"
+    SEQ_LEN = sys.argv[1]
     HALF_SEQ_LEN = int(SEQ_LEN) // 2
     QUATER_SEQ_LEN = int(SEQ_LEN) // 4
     project_root = '/ccb/cybertron/khchao/splam-analysis-results/' 
@@ -47,9 +48,9 @@ def main():
     print("JUNC_POSITIONS: ", len(JUNC_POSITIONS))
 
     # THRESHOLD = "1"
-    for threshold in range(2, 101):
-        output_dir = f'{project_root}train/results/Negs/Neg_{threshold}/Select_junctions/'
-        junctions_cleaned = f'{project_root}train/results/Negs/Neg_{threshold}/BAM_junctions/junctions_{threshold}_cleaned.bed'
+    for threshold in range(1, 2):
+        output_dir = f'{project_root}train/results/Neg_{threshold}/Select_junctions/'
+        junctions_cleaned = f'{project_root}train/results/Neg_{threshold}/BAM_junctions/junctions_{threshold}_cleaned.bed'
         
         #################################
         # For 'd_a.bed': 0-based, 1-based

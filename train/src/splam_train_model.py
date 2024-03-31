@@ -11,6 +11,7 @@ from sklearn.model_selection import KFold
 from splam_utils import *
 from splam_dataset_Chromsome import *
 from SPLAM import *
+import sys
 
 #############################
 # Global variable definition
@@ -19,7 +20,7 @@ EPOCH_NUM = 15
 BATCH_SIZE = 100
 N_WORKERS = 1
 L = 64
-SEQ_LEN = "800"
+SEQ_LEN = sys.argv[1]
 JUNC_THRESHOLD = 0.1
 
 W = np.asarray([11, 11, 11, 11, 11, 11, 11, 11,
@@ -61,7 +62,7 @@ print("######################################################\n")
 #############################
 # Creating directories
 #############################
-MODEL_VERSION = "SPLAM_v13/"
+MODEL_VERSION = f'Splam_{SEQ_LEN}/'
 MODEL_OUTPUT_BASE = "./MODEL/"+MODEL_VERSION
 LOG_OUTPUT_BASE = MODEL_OUTPUT_BASE + "LOG/"
 LOG_OUTPUT_TRAIN_BASE = MODEL_OUTPUT_BASE + "LOG/TRAIN/"
@@ -76,8 +77,7 @@ os.makedirs(LOG_OUTPUT_TEST_BASE, exist_ok=True)
 # Training Data initialization
 #############################
 # save_dataloader(BATCH_SIZE, MODEL_VERSION, N_WORKERS)
-# train_loader, val_loader, test_loader = get_train_dataloader(BATCH_SIZE, MODEL_VERSION, N_WORKERS)
-train_loader, test_loader = get_train_dataloader(BATCH_SIZE, MODEL_VERSION, N_WORKERS)
+train_loader, val_loader, test_loader = get_train_dataloader(BATCH_SIZE, MODEL_VERSION, SEQ_LEN, N_WORKERS)
 train_iterator = iter(train_loader)
 # valid_iterator = iter(val_loader)
 test_iterator = iter(test_loader)
@@ -199,8 +199,8 @@ def train_one_epoch(epoch_idx, train_loader):
     model.train()
     for batch_idx, data in enumerate(train_loader):
         # print("batch_idx: ", batch_idx)
-        # DNAs:  torch.Size([40, 800, 4])
-        # labels:  torch.Size([40, 1, 800, 3])
+        # DNAs:  torch.Size([40, seq_len, 4])
+        # labels:  torch.Size([40, 1, seq_len, 3])
         DNAs, labels, chr = data 
         DNAs = DNAs.to(torch.float32).to(device)
         labels = labels.to(torch.float32).to(device)
@@ -220,7 +220,7 @@ def train_one_epoch(epoch_idx, train_loader):
         A_YP = yp[is_expr, 1, :].to('cpu').detach().numpy()
         D_YL = labels[is_expr, 2, :].to('cpu').detach().numpy()
         D_YP = yp[is_expr, 2, :].to('cpu').detach().numpy()
-        J_G_TP, J_G_FN, J_G_FP, J_G_TN, J_TP, J_FN, J_FP, J_TN = print_junc_statistics(D_YL, A_YL, D_YP, A_YP, JUNC_THRESHOLD, J_G_TP, J_G_FN, J_G_FP, J_G_TN)        
+        J_G_TP, J_G_FN, J_G_FP, J_G_TN, J_TP, J_FN, J_FP, J_TN = print_junc_statistics(D_YL, A_YL, D_YP, A_YP, JUNC_THRESHOLD, J_G_TP, J_G_FN, J_G_FP, J_G_TN, int(SEQ_LEN))
         A_accuracy, A_auprc = print_top_1_statistics(Acceptor_YL, Acceptor_YP)
         D_accuracy, D_auprc = print_top_1_statistics(Donor_YL, Donor_YP)
         A_G_TP, A_G_FN, A_G_FP, A_G_TN, A_TP, A_FN, A_FP, A_TN = print_threshold_statistics(Acceptor_YL, Acceptor_YP, JUNC_THRESHOLD, A_G_TP, A_G_FN, A_G_FP, A_G_TN)
@@ -293,8 +293,8 @@ def val_one_epoch(epoch_idx, val_loader):
     #######################################   
     model.eval()
     for batch_idx, data in enumerate(val_loader):
-        # DNAs:  torch.Size([40, 800, 4])
-        # labels:  torch.Size([40, 1, 800, 3])
+        # DNAs:  torch.Size([40, seq_len, 4])
+        # labels:  torch.Size([40, 1, seq_len, 3])
         DNAs, labels, chr = data 
         DNAs = DNAs.to(torch.float32).to(device)
         labels = labels.to(torch.float32).to(device)
@@ -313,7 +313,7 @@ def val_one_epoch(epoch_idx, val_loader):
         A_YP = yp[is_expr, 1, :].to('cpu').detach().numpy()
         D_YL = labels[is_expr, 2, :].to('cpu').detach().numpy()
         D_YP = yp[is_expr, 2, :].to('cpu').detach().numpy()
-        J_G_TP, J_G_FN, J_G_FP, J_G_TN, J_TP, J_FN, J_FP, J_TN = print_junc_statistics(D_YL, A_YL, D_YP, A_YP, JUNC_THRESHOLD, J_G_TP, J_G_FN, J_G_FP, J_G_TN)        
+        J_G_TP, J_G_FN, J_G_FP, J_G_TN, J_TP, J_FN, J_FP, J_TN = print_junc_statistics(D_YL, A_YL, D_YP, A_YP, JUNC_THRESHOLD, J_G_TP, J_G_FN, J_G_FP, J_G_TN, int(SEQ_LEN))
         A_accuracy, A_auprc = print_top_1_statistics(Acceptor_YL, Acceptor_YP)
         D_accuracy, D_auprc = print_top_1_statistics(Donor_YL, Donor_YP)
         A_G_TP, A_G_FN, A_G_FP, A_G_TN, A_TP, A_FN, A_FP, A_TN = print_threshold_statistics(Acceptor_YL, Acceptor_YP, JUNC_THRESHOLD, A_G_TP, A_G_FN, A_G_FP, A_G_TN)
@@ -381,8 +381,8 @@ def test_one_epoch(epoch_idx, test_loader):
     model.eval()
     for batch_idx, data in enumerate(test_loader):
         # print("batch_idx: ", batch_idx)
-        # DNAs:  torch.Size([40, 800, 4])
-        # labels:  torch.Size([40, 1, 800, 3])
+        # DNAs:  torch.Size([40, seq_len, 4])
+        # labels:  torch.Size([40, 1, seq_len, 3])
         DNAs, labels, chr = data 
         DNAs = DNAs.to(torch.float32).to(device)
         labels = labels.to(torch.float32).to(device)
@@ -403,7 +403,7 @@ def test_one_epoch(epoch_idx, test_loader):
         A_YP = yp[is_expr, 1, :].to('cpu').detach().numpy()
         D_YL = labels[is_expr, 2, :].to('cpu').detach().numpy()
         D_YP = yp[is_expr, 2, :].to('cpu').detach().numpy()
-        J_G_TP, J_G_FN, J_G_FP, J_G_TN, J_TP, J_FN, J_FP, J_TN = print_junc_statistics(D_YL, A_YL, D_YP, A_YP, JUNC_THRESHOLD, J_G_TP, J_G_FN, J_G_FP, J_G_TN)        
+        J_G_TP, J_G_FN, J_G_FP, J_G_TN, J_TP, J_FN, J_FP, J_TN = print_junc_statistics(D_YL, A_YL, D_YP, A_YP, JUNC_THRESHOLD, J_G_TP, J_G_FN, J_G_FP, J_G_TN, int(SEQ_LEN))
         A_accuracy, A_auprc = print_top_1_statistics(Acceptor_YL, Acceptor_YP)
         D_accuracy, D_auprc = print_top_1_statistics(Donor_YL, Donor_YP)
         A_G_TP, A_G_FN, A_G_FP, A_G_TN, A_TP, A_FN, A_FP, A_TN = print_threshold_statistics(Acceptor_YL, Acceptor_YP, JUNC_THRESHOLD, A_G_TP, A_G_FN, A_G_FP, A_G_TN)
@@ -450,18 +450,18 @@ def main():
     #############################
     print("In main function")
 
-    # for epoch_num in range(EPOCH_NUM):
-    #     train_one_epoch(epoch_num, train_loader)
-    #     # val_one_epoch(epoch_num, val_loader)
-    #     test_one_epoch(epoch_num, test_loader)
-    #     torch.save(model, MODEL_OUTPUT_BASE+'splam_'+str(epoch_num)+'.pt')
-    # fw_train_log_loss.close()
-    # fw_train_log_acc.close()
-    # fw_train_log_lr.close()
-    # fw_val_log_loss.close()
-    # fw_val_log_acc.close()
-    # fw_test_log_loss.close()
-    # fw_test_log_acc.close()
+    for epoch_num in range(EPOCH_NUM):
+        train_one_epoch(epoch_num, train_loader)
+        # val_one_epoch(epoch_num, val_loader)
+        test_one_epoch(epoch_num, test_loader)
+        torch.save(model, MODEL_OUTPUT_BASE+'splam_'+str(epoch_num)+'.pt')
+    fw_train_log_loss.close()
+    fw_train_log_acc.close()
+    fw_train_log_lr.close()
+    fw_val_log_loss.close()
+    fw_val_log_acc.close()
+    fw_test_log_loss.close()
+    fw_test_log_acc.close()
     
 if __name__ == "__main__":
     main()

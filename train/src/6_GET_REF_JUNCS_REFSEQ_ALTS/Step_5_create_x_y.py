@@ -1,11 +1,12 @@
 import os
+import sys
 
 project_root = '/ccb/cybertron/khchao/splam-analysis-results/' 
 input_file_dir = f'{project_root}train/results/RefSeq_ALTS/BAM_REF_Intersection/'
 output_dir = f'{project_root}train/results/RefSeq_ALTS/INPUTS/'
 
 def main():
-    SEQ_LEN = "800"
+    SEQ_LEN = sys.argv[1]
     HALF_SEQ_LEN = int(SEQ_LEN) // 2
     QUATER_SEQ_LEN = int(SEQ_LEN) // 4
     THRESHOLD = "100"

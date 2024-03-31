@@ -1,5 +1,6 @@
 import pandas as pd
 import os
+import sys
 
 project_root = '/ccb/cybertron/khchao/splam-analysis-results/' 
 output_dir = f'{project_root}train/results/MANE/BAM_REF_Intersection/'
@@ -15,7 +16,7 @@ def get_hg38_chrom_size():
 
 def main():
     THRESHOLD = "100"
-    SEQ_LEN="800"
+    SEQ_LEN=sys.argv[1]
     QUATER_SEQ_LEN = int(SEQ_LEN) // 4
     BAM_dir = f'{project_root}train/results/BAM_junctions/{SEQ_LEN}bp/{THRESHOLD}_juncs/'
     REF_dir = f'{project_root}train/results/MANE/REF_junctions/'

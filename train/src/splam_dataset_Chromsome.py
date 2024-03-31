@@ -8,7 +8,6 @@ import math
 
 from splam_utils import *
 # MODEL_VERSION
-SEQ_LEN = "800"
 
 project_root = '/ccb/cybertron/khchao/splam-analysis-results/'
 def split_seq_name(seq):
@@ -20,7 +19,7 @@ class myDatasetEval(Dataset):
         print("!!shuffle: ", shuffle, eval_select)
         self.segment_len = segment_len
         self.data = []
-        CONSTANT_SIZE_NEG = 10000
+        CONSTANT_SIZE_NEG = 20000
         if type == "eval":
             #################################
             ## Processing 'NEGATIVE_1' samples
@@ -36,15 +35,15 @@ class myDatasetEval(Dataset):
                         seq_name = split_seq_name(line)
                     elif nidx % 2 == 1:
                         seq = line
-                        X, Y = create_datapoints(seq, '-')
+                        X, Y = create_datapoints(seq, '-', segment_len)
                         X = torch.Tensor(np.array(X))
                         Y = torch.Tensor(np.array(Y)[0])
-                        if X.size()[0] != 800:
+                        if X.size()[0] != int(segment_len):
                             print(X.size())
                             print(Y.size())
                         self.data.append([X, Y, seq_name])
                     nidx += 1
-                    if nidx %10000 == 0:
+                    if nidx %20000 == 0:
                         print("nidx: ", nidx)
                     if nidx >= CONSTANT_SIZE_NEG:
                         break
@@ -67,197 +66,133 @@ class myDatasetEval(Dataset):
 
 
 class myDatasetTrain(Dataset):
-    def __init__(self, type, segment_len=800, shuffle=True, eval_select=None, idx=0):
-        print("!!shuffle: ", shuffle, eval_select)
+    def __init__(self, process_type, segment_len=800, shuffle=True, eval_select=None, idx=0):
         self.segment_len = segment_len
         self.data = []
-        pos_f = ""
-        if type == "train" or type == "test":
-            pos_f = f'{project_root}/train/results/MANE/INPUTS/800bp/input_pos.fa'
-            neg_1_f = f'{project_root}/train/results/Neg_1/INPUTS/800bp/input_pos.fa'
-            neg_random_f = f'{project_root}/train/results/Neg_1/INPUTS/800bp/input_pos.fa'
-        # elif type == "eval":
-        #     pos_MANE_f = "./INPUTS/"+SEQ_LEN+"bp/input_pos_MANE/test_pos_MANE.shuffle.fa"
-        #     pos_ALTS_f = "./INPUTS/"+SEQ_LEN+"bp/input_pos_ALTS/test_pos_ALTS.shuffle.fa"
-        #     neg_1_f = "./INPUTS/"+SEQ_LEN+"bp/input_neg_1/test_neg_1.shuffle.fa"
-        #     neg_random_f = "./INPUTS/"+SEQ_LEN+"bp/input_neg_random/test_neg_random.shuffle.fa"
-        #     test_f = f'/ccb/cybertron/khchao/splam-analysis-results/train/results/Negs/Neg_{idx}/INPUTS/800bp/input_neg_{idx}.fa'
-
-        CONSTANT_SIZE_NEG = 10000
-        
+        if process_type == "train":
+            pos_MANE_f = f'{project_root}/train/results/train_test_dataset/input_pos_mane/{segment_len}bp/train_pos_mane.shuffle.fa'
+            pos_ALTS_f = f'{project_root}/train/results/train_test_dataset/input_pos_alts/{segment_len}bp/train_pos_alts.shuffle.fa'
+            neg_1_f = f'{project_root}/train/results/train_test_dataset/input_neg_1/{segment_len}bp/train_neg_1.shuffle.fa'
+            neg_random_f = f'{project_root}/train/results/train_test_dataset/input_neg_random/{segment_len}bp/train_neg_random.shuffle.fa'
+        elif process_type == "test":
+            pos_MANE_f = f'{project_root}/train/results/train_test_dataset/input_pos_mane/{segment_len}bp/test_pos_mane.shuffle.fa'
+            pos_ALTS_f = f'{project_root}/train/results/train_test_dataset/input_pos_alts/{segment_len}bp/test_pos_alts.shuffle.fa'
+            neg_1_f = f'{project_root}/train/results/train_test_dataset/input_neg_1/{segment_len}bp/test_neg_1.shuffle.fa'
+            neg_random_f = f'{project_root}/train/results/train_test_dataset/input_neg_random/{segment_len}bp/test_neg_random.shuffle.fa'
+        CONSTANT_SIZE_NEG = 0
         #################################
-        ## Processing 'POSITIVE' samples
+        ## Processing 'Positive_MANE' samples
         #################################
-        if type == "train" or type == "test" or (type == "eval" and eval_select=="pos"):
-            pidx = 0
-            with open(pos_f, "r") as f:
-                print("Processing ", pos_f)
-                lines = f.read().splitlines()
-                seq_name = ""
-                seq = ""
-                for line in lines:
-                    # print(line)
-                    if pidx % 2 == 0:
-                        seq_name = split_seq_name(line)
-                    elif pidx % 2 == 1:
-                        seq = line
-                        # print(seq)
-                        X, Y = create_datapoints(seq, '+')
-                        X = torch.Tensor(np.array(X))
-                        Y = torch.Tensor(np.array(Y)[0])
-                        if X.size()[0] != 800:
-                            print("seq_name: ", seq_name)
-                            print(X.size())
-                            print(Y.size())
-                        self.data.append([X, Y, seq_name])
-                    pidx += 1
-                    if pidx %10000 == 0:
-                        print("pidx: ", pidx)
-                    if type == "train":
-                        pass
-                    elif type == "test":
-                        if pidx >= 3000:
-                            break
-
-            print("pidx: ", pidx)
-
-            CONSTANT_SIZE = pidx
-            CONSTANT_SIZE_NEG = CONSTANT_SIZE*3
-            print("\033[1m[INFO] CONSTANT_SIZE     : ", CONSTANT_SIZE, "\033[0m")
-            print("\033[1m[INFO] CONSTANT_SIZE_NEG : ", CONSTANT_SIZE_NEG, "\033[0m")
-
-        if type == "train" or type == "test" or (type == "eval" and eval_select=="neg_1"):
-            #################################
-            ## Processing 'NEGATIVE_1' samples
-            #################################
-            n1idx = 0
-            with open(neg_1_f, "r") as f:
-                print("Processing ", neg_1_f)
-                lines = f.read().splitlines()
-                seq_name = ""
-                seq = ""
-                for line in lines:
-                    # print(line)
-                    if n1idx % 2 == 0:
-                        seq_name = split_seq_name(line)
-                    elif n1idx % 2 == 1:
-                        seq = line
-                        X, Y = create_datapoints(seq, '-')
-                        X = torch.Tensor(np.array(X))
-                        Y = torch.Tensor(np.array(Y)[0])
-                        if X.size()[0] != 800:
-                            print("seq_name: ", seq_name)
-                            print(X.size())
-                            print(Y.size())
-                        self.data.append([X, Y, seq_name])
-                    n1idx += 1
-                    if n1idx %10000 == 0:
-                        print("n1idx: ", n1idx)
-
-                    if type == "train" or type == "test":
-                        if n1idx >= CONSTANT_SIZE_NEG:
-                            break
-            print("n1idx: ", n1idx)
-
-        if type == "train" or type == "test" or (type == "eval" and eval_select=="neg_random"):
-            #################################
-            ## Processing 'NEGATIVE_1' samples
-            #################################
-            nridx = 0
-            with open(neg_random_f, "r") as f:
-                print("Processing ", neg_random_f)
-                lines = f.read().splitlines()
-                seq_name = ""
-                seq = ""
-                for line in lines:
-                    # print(line)
-                    if nridx % 2 == 0:
-                        seq_name = split_seq_name(line)
-                    elif nridx % 2 == 1:
-                        seq = line
-                        # print(seq)
-                        X, Y = create_datapoints(seq, '-')
-                        X = torch.Tensor(np.array(X))
-                        Y = torch.Tensor(np.array(Y)[0])
-                        if X.size()[0] != 800:
-                            print("seq_name: ", seq_name)
-                            print(X.size())
-                            print(Y.size())
-                        self.data.append([X, Y, seq_name])
-                    nridx += 1
-                    if nridx %10000 == 0:
-                        print("nridx: ", nridx)
-
-                    if type == "train" or type == "test":
-                        if nridx >= CONSTANT_SIZE_NEG:
-                            break
-            print("nridx: ", nridx)
-
-        if type == "eval" and eval_select=="pos_ALTS":
-            #################################
-            ## Processing 'POSITIVE_REFSEQ_PROTEIN_ISOFORMS' samples
-            #################################
-            pp_alts_idx = 0
-            with open(pos_ALTS_f, "r") as f:
-                print("Processing ", pos_ALTS_f)
-                lines = f.read().splitlines()
-                seq_name = ""
-                seq = ""
-                for line in lines:
-                    # print(line)
-                    if pp_alts_idx % 2 == 0:
-                        seq_name = split_seq_name(line)
-                    elif pp_alts_idx % 2 == 1:
-                        seq = line
-                        # print(seq)
-                        X, Y = create_datapoints(seq, '+')
-                        X = torch.Tensor(np.array(X))
-                        Y = torch.Tensor(np.array(Y)[0])
-                        # print("X.size(): ", X)
-                        # print("Y.size(): ", Y)
-                        if X.size()[0] != 800:
-                            print("seq_name: ", seq_name)
-                            print(X.size())
-                            print(Y.size())
-                        self.data.append([X, Y, seq_name])
-                    pp_alts_idx += 1
-                    if pp_alts_idx %10000 == 0:
-                        print("pidx: ", pp_alts_idx)
-                        # print(seq_name)
-            print("pp_alts_idx: ", pp_alts_idx)
-
-        if type == "eval" and eval_select=="pos_MANE":
-            #################################
-            ## Processing 'POSITIVE_REFSEQ_PROTEIN_ISOFORMS' samples
-            #################################
-            pp_MANE_idx = 0
-            with open(pos_MANE_f, "r") as f:
-                print("Processing ", pos_MANE_f)
-                lines = f.read().splitlines()
-                seq_name = ""
-                seq = ""
-                for line in lines:
-                    # print(line)
-                    if pp_MANE_idx % 2 == 0:
-                        seq_name = split_seq_name(line)
-                    elif pp_MANE_idx % 2 == 1:
-                        seq = line
-                        # print(seq)
-                        X, Y = create_datapoints(seq, '+')
-                        X = torch.Tensor(np.array(X))
-                        Y = torch.Tensor(np.array(Y)[0])
-                        # print("X.size(): ", X)
-                        # print("Y.size(): ", Y)
-                        if X.size()[0] != 800:
-                            print("seq_name: ", seq_name)
-                            print(X.size())
-                            print(Y.size())
-                        self.data.append([X, Y, seq_name])
-                    pp_MANE_idx += 1
-                    if pp_MANE_idx %10000 == 0:
-                        print("pidx: ", pp_MANE_idx)
-            print("pp_MANE_idx: ", pp_MANE_idx)
-        
+        pp_MANE_idx = 0
+        with open(pos_MANE_f, "r") as f:
+            print("\nProcessing ", pos_MANE_f)
+            lines = f.read().splitlines()
+            seq_name = ""
+            seq = ""
+            for line in lines:
+                if pp_MANE_idx % 2 == 0:
+                    seq_name = split_seq_name(line)
+                elif pp_MANE_idx % 2 == 1:
+                    seq = line
+                    X, Y = create_datapoints(seq, '+', segment_len)
+                    X = torch.Tensor(np.array(X))
+                    Y = torch.Tensor(np.array(Y)[0])
+                    if X.size()[0] != int(segment_len):
+                        print("seq_name: ", seq_name)
+                        print(X.size())
+                        print(Y.size())
+                    self.data.append([X, Y, seq_name])
+                pp_MANE_idx += 1
+                if pp_MANE_idx %20000 == 0:
+                    print("\tpp_MANE_idx: ", pp_MANE_idx)
+                    break
+        print("\tpp_MANE_idx: ", pp_MANE_idx)
+        #################################
+        ## Processing 'Positive_ALTS' samples
+        #################################
+        pp_alts_idx = 0
+        with open(pos_ALTS_f, "r") as f:
+            print("\nProcessing ", pos_ALTS_f)
+            lines = f.read().splitlines()
+            seq_name = ""
+            seq = ""
+            for line in lines:
+                if pp_alts_idx % 2 == 0:
+                    seq_name = split_seq_name(line)
+                elif pp_alts_idx % 2 == 1:
+                    seq = line
+                    X, Y = create_datapoints(seq, '+', segment_len)
+                    X = torch.Tensor(np.array(X))
+                    Y = torch.Tensor(np.array(Y)[0])
+                    if X.size()[0] != int(segment_len):
+                        print("seq_name: ", seq_name)
+                        print(X.size())
+                        print(Y.size())
+                    self.data.append([X, Y, seq_name])
+                pp_alts_idx += 1
+                if pp_alts_idx %20000 == 0:
+                    print("\tpp_alts_idx: ", pp_alts_idx)
+                    break
+        print("\tpp_alts_idx: ", pp_alts_idx)
+        CONSTANT_SIZE_NEG = (pp_MANE_idx+pp_alts_idx) 
+        print("CONSTANT_SIZE_NEG: ", CONSTANT_SIZE_NEG)
+        #################################
+        ## Processing 'NEGATIVE_1' samples
+        #################################
+        n1idx = 0
+        with open(neg_1_f, "r") as f:
+            print("\nProcessing ", neg_1_f)
+            lines = f.read().splitlines()
+            seq_name = ""
+            seq = ""
+            for line in lines:
+                # print(line)
+                if n1idx % 2 == 0:
+                    seq_name = split_seq_name(line)
+                elif n1idx % 2 == 1:
+                    seq = line
+                    X, Y = create_datapoints(seq, '-', segment_len)
+                    X = torch.Tensor(np.array(X))
+                    Y = torch.Tensor(np.array(Y)[0])
+                    if X.size()[0] != int(segment_len):
+                        print("seq_name: ", seq_name)
+                        print(X.size())
+                        print(Y.size())
+                    self.data.append([X, Y, seq_name])
+                n1idx += 1
+                if n1idx %20000 == 0:
+                    print("\tn1idx: ", n1idx)
+                if n1idx >= CONSTANT_SIZE_NEG:
+                    break
+        print("\tn1idx: ", n1idx)
+        #################################
+        ## Processing 'NEGATIVE_Random' samples
+        #################################
+        nridx = 0
+        with open(neg_random_f, "r") as f:
+            print("\nProcessing ", neg_random_f)
+            lines = f.read().splitlines()
+            seq_name = ""
+            seq = ""
+            for line in lines:
+                if nridx % 2 == 0:
+                    seq_name = split_seq_name(line)
+                elif nridx % 2 == 1:
+                    seq = line
+                    X, Y = create_datapoints(seq, '-', segment_len)
+                    X = torch.Tensor(np.array(X))
+                    Y = torch.Tensor(np.array(Y)[0])
+                    if X.size()[0] != int(segment_len):
+                        print("seq_name: ", seq_name)
+                        print(X.size())
+                        print(Y.size())
+                    self.data.append([X, Y, seq_name])
+                nridx += 1
+                if nridx %20000 == 0:
+                    print("\tnridx: ", nridx)
+                if nridx >= CONSTANT_SIZE_NEG:
+                    break
+        print("\tnridx: ", nridx)
         #################################
         ## Shuffle the data 
         #################################
@@ -275,11 +210,10 @@ class myDatasetTrain(Dataset):
         return feature, label, seq_name
 
 
-def get_train_dataloader(batch_size, TARGET, n_workers):
+def get_train_dataloader(batch_size, TARGET, SEQ_LEN, n_workers):
     """Generate dataloader"""
-    # trainset_origin = myDataset("train", int(SEQ_LEN))
-    # trainset, valset = torch.utils.data.random_split(trainset_origin, [0.9, 0.1])
-    trainset = myDatasetTrain("train", int(SEQ_LEN))
+    trainset_origin = myDatasetTrain("train", int(SEQ_LEN))
+    trainset, valset = torch.utils.data.random_split(trainset_origin, [0.9, 0.1])
     testset = myDatasetTrain("test", int(SEQ_LEN))
     train_loader = DataLoader(
         trainset,
@@ -288,27 +222,23 @@ def get_train_dataloader(batch_size, TARGET, n_workers):
         drop_last=False,
         pin_memory=True,
     )
-    # val_loader = DataLoader(
-    #     valset,
-    #     batch_size=batch_size,
-    #     shuffle=True,
-    #     drop_last=False,
-    #     pin_memory=True,
-    # )
+    val_loader = DataLoader(
+        valset,
+        batch_size=batch_size,
+        shuffle=True,
+        drop_last=False,
+        pin_memory=True,
+    )
     test_loader = DataLoader(
         testset,
         batch_size = batch_size,
         drop_last=False,
         pin_memory=True,
     )
-
     #######################################
     # predicting splice / non-splice
     #######################################
-    return train_loader, test_loader
-    # torch.save(train_loader, "./INPUTS/"+SEQ_LEN+"bp/"+TARGET+"/train.pt")
-    # torch.save(val_loader, "./INPUTS/"+SEQ_LEN+"bp/"+TARGET+"/val.pt")
-    # torch.save(test_loader, "./INPUTS/"+SEQ_LEN+"bp/"+TARGET+"/test.pt")
+    return train_loader, val_loader, test_loader
 
 
 def get_test_dataloader(batch_size, TARGET, n_workers, shuffle):

@@ -1,5 +1,6 @@
 import pandas as pd
 import os 
+import sys
 
 def get_hg38_chrom_size():
     f_chrs = open("../hg38_chrom_size.tsv", "r")
@@ -14,7 +15,7 @@ def get_hg38_chrom_size():
 def main():
     chrs = get_hg38_chrom_size()
     THRESHOLD = "100"
-    SEQ_LEN="800"
+    SEQ_LEN=sys.argv[1]
     QUATER_SEQ_LEN = int(SEQ_LEN) // 4
     #################################
     # For 'd_a.bed': 0-based, 1-based

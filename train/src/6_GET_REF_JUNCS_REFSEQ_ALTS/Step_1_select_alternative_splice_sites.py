@@ -1,6 +1,7 @@
 import os 
 import re
 import pandas as pd
+import sys
 
 project_root = '/ccb/cybertron/khchao/splam-analysis-results/' 
 output_dir = f'{project_root}train/results/RefSeq_ALTS/REF_junctions/'
@@ -18,7 +19,7 @@ def chr_name_convert():
 def main():
     JUNC_COUNTER = 0
     THRESHOLD = "100"
-    SEQ_LEN="800"
+    SEQ_LEN=sys.argv[1]
     QUATER_SEQ_LEN = int(SEQ_LEN) // 4
     os.makedirs(output_dir, exist_ok=True)
     d_a_out = f'{output_dir}ref_d_a.bed'
