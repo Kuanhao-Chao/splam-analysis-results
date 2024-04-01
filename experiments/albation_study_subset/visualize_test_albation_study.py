@@ -4,14 +4,14 @@ import matplotlib.pyplot as plt
 
 project_root = "/ccb/cybertron/khchao/splam-analysis-results/"
 # albation_study_root=f'{project_root}results/albation_study/MODEL/subset_10000/'
-albation_study_root=f'{project_root}results/albation_study/MODEL/subset_10000/'
+albation_study_root=f'{project_root}results/albation_study/MODEL_TEST/'
 output_dir = f'{albation_study_root}img/'
 os.makedirs(output_dir, exist_ok=True)
 
-res_type = ['TRAIN', 'TEST']
+res_type = ['TEST']
 
 def moving_average(data, window_size):
-    """Compute the moving average of a list Xof numbers."""
+    """Compute the moving average of a list of numbers."""
     return np.convolve(data, np.ones(window_size)/window_size, mode='valid')
 
 def calculate_f1(precision, recall):
@@ -21,12 +21,14 @@ def calculate_f1(precision, recall):
 for eval_target in ['A', 'D', 'J']:
     if eval_target == 'A':
         metrics = [
+            "_A_accuracy.txt",
             "_A_auprc.txt",
             "_A_threshold_precision.txt",
             "_A_threshold_recall.txt",
         ]
     elif eval_target == 'D':
         metrics = [
+            "_D_accuracy.txt",
             "_D_auprc.txt",
             "_D_threshold_precision.txt",
             "_D_threshold_recall.txt",
@@ -44,6 +46,7 @@ for eval_target in ['A', 'D', 'J']:
     # Initialize a dictionary to hold all scores
     scores_dict = {}
     for exp in ['rsg', 'rsb']:
+    # for exp in ['rsb']:
         scores_dict = {}
         # Set initial values based on the experiment
         rsg, rsb = (1, 4) if exp == 'rsg' else (5, 1)
@@ -61,7 +64,7 @@ for eval_target in ['A', 'D', 'J']:
                     key = f'rsg_{rsg}__rsb_{rsb}'
                     # scores_key = f'{exp}_{rs_value}'
                     key_dir = f'{albation_study_root}{key}/'
-                    file_path = f'{key_dir}LOG/{res}/{res.lower()}{metric}'
+                    file_path = f'{key_dir}test_juncs/LOG/{res.lower()}{metric}'
                     if os.path.exists(file_path):
                         with open(file_path, 'r') as file:
                             lines = file.readlines()
@@ -87,10 +90,10 @@ for eval_target in ['A', 'D', 'J']:
                     scores_dict[f1_key][scores_key] = f1_scores
 
         # Visualization
-        fig, axs = plt.subplots(len(res_type), len(metrics), figsize=(30,12), dpi=800)  # Adjusted figsize and added dpi for clarity
+        fig, axs = plt.subplots(len(res_type), len(metrics), figsize=(40,12), dpi=800)  # Adjusted figsize and added dpi for clarity
         for i, res in enumerate(res_type):
             for j, metric in enumerate(metrics):
-                ax = axs[i, j]
+                ax = axs[j]
                 data_dict = scores_dict[f'{res}_{metric}']
                 if data_dict:
                     for scores_key, data in data_dict.items():

@@ -206,9 +206,7 @@ def get_junc_scores(D_YL, A_YL, D_YP, A_YP, choice):
 
 def print_junc_statistics(D_YL, A_YL, D_YP, A_YP, threshold, TOTAL_TP, TOTAL_FN, TOTAL_FP, TOTAL_TN):
     label_junc_idx = (D_YL[:, 200]==1) & (A_YL[:, 600]==1)
-    label_nonjunc_idx = (D_YL[:, 200]==0) & (A_YL[:, 600]==0)
     predict_junc_idx = (D_YP[:, 200]>=threshold) & (A_YP[:, 600]>=threshold)
-    predict_nonjunc_idx = (D_YP[:, 200]<threshold) | (A_YP[:, 600]<threshold)
     idx_true = np.nonzero(label_junc_idx == True)[0]
     idx_pred = np.nonzero(predict_junc_idx == True)[0]
     LCL_TOTAL_TP = np.size(np.intersect1d(idx_true, idx_pred))

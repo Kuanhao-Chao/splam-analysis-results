@@ -71,16 +71,16 @@ class myDatasetTrain(Dataset):
         CONSTANT_SIZE = 0
         CONSTANT_SIZE_NEG = 0
         if process_type == "train":
-            pos_MANE_f = f'{project_root}/train/results/train_test_dataset/input_pos_mane/train_pos_mane.shuffle.fa'
-            pos_ALTS_f = f'{project_root}/train/results/train_test_dataset/input_pos_alts/train_pos_alts.shuffle.fa'
-            neg_1_f = f'{project_root}/train/results/train_test_dataset/input_neg_1/train_neg_1.shuffle.fa'
-            neg_random_f = f'{project_root}/train/results/train_test_dataset/input_neg_random/train_neg_random.shuffle.fa'
+            pos_MANE_f = f'{project_root}/train/results/train_test_dataset/input_pos_mane/{segment_len}bp/train_pos_mane.shuffle.fa'
+            pos_ALTS_f = f'{project_root}/train/results/train_test_dataset/input_pos_alts/{segment_len}bp/train_pos_alts.shuffle.fa'
+            neg_1_f = f'{project_root}/train/results/train_test_dataset/input_neg_1/{segment_len}bp/train_neg_1.shuffle.fa'
+            neg_random_f = f'{project_root}/train/results/train_test_dataset/input_neg_random/{segment_len}bp/train_neg_random.shuffle.fa'
             CONSTANT_SIZE = 30000
         elif process_type == "test":
-            pos_MANE_f = f'{project_root}/train/results/train_test_dataset/input_pos_mane/test_pos_mane.shuffle.fa'
-            pos_ALTS_f = f'{project_root}/train/results/train_test_dataset/input_pos_alts/test_pos_alts.shuffle.fa'
-            neg_1_f = f'{project_root}/train/results/train_test_dataset/input_neg_1/test_neg_1.shuffle.fa'
-            neg_random_f = f'{project_root}/train/results/train_test_dataset/input_neg_random/test_neg_random.shuffle.fa'
+            pos_MANE_f = f'{project_root}/train/results/train_test_dataset/input_pos_mane/{segment_len}bp/test_pos_mane.shuffle.fa'
+            pos_ALTS_f = f'{project_root}/train/results/train_test_dataset/input_pos_alts/{segment_len}bp/test_pos_alts.shuffle.fa'
+            neg_1_f = f'{project_root}/train/results/train_test_dataset/input_neg_1/{segment_len}bp/test_neg_1.shuffle.fa'
+            neg_random_f = f'{project_root}/train/results/train_test_dataset/input_neg_random/{segment_len}bp/test_neg_random.shuffle.fa'
             CONSTANT_SIZE = 10000
         #################################
         ## Processing 'Positive_MANE' samples
