@@ -47,11 +47,12 @@ for eval_target in ['A', 'D', 'J']:
         for metric in metrics:
             scores_dict[f'{res}_{metric}'] = {}
             print(f'{res}; {metric}')
-            for seq_len in [200, 400, 600]:
+            for seq_len in [200, 400, 600, 800]:
                 key = f'Splam_{seq_len}'
                 # scores_key = f'{exp}_{rs_value}'
                 key_dir = f'{albation_study_root}{key}/'
                 file_path = f'{key_dir}LOG/{res}/{res.lower()}{metric}'
+                print("file_path: ", file_path)
                 if os.path.exists(file_path):
                     with open(file_path, 'r') as file:
                         lines = file.readlines()

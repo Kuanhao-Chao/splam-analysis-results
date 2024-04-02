@@ -1,274 +1,202 @@
-"""
-This file evaluate the testing dataset for the SPLAM model.
-
-Parameters:
-    MODEL_VERSION   : the version of the model.
-
-    Input directory : "./INPUTS/"+SEQ_LEN+"bp/input_pos/"
-
-    Output directory: "../src_tools_evaluation/splam_result/"+MODEL_VERSION+"/"
-"""
-import os, sys
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
+import os
+import sys
 import torch
-import torch.nn as nn
-# from TEST_dataset import *
-from splam_dataset_Chromsome import *
-from SPLAM import *
-# from splam_utils import *
-import matplotlib.pyplot as plt; plt.rcdefaults()
-import numpy as np
 from tqdm import tqdm
 import warnings
 from sklearn.metrics import precision_recall_curve, roc_curve
-import pickle
-import platform
+from splam_dataset_Chromsome import *
+from SPLAM import *
+
+import torch.nn as nn
+
 
 warnings.filterwarnings("ignore")
-MODEL_VERSION = "RELEASED/"
-JUNC_THRESHOLD = 0.1
+
+JUNC_THRESHOLD = 0.5
 
 
 def parse_junction(name):
-    # print("name: ", name)
+    print("name: ", name)
     res = name.split(":")
     strand = name[-2]
     chr_name = res[0]
     if strand == "+":
-        start = int(res[1].split("-")[0])+200
-        end = int(res[2].split("-")[1].split('(')[0])-200
+        start = int(res[1].split("-")[0]) + 200
+        end = int(res[2].split("-")[1].split('(')[0]) - 200
     elif strand == "-":
-        start = int(res[2].split("-")[0])+200
-        end = int(res[1].split("-")[1].split('(')[0])-200
-    # print("chr_name: ", chr_name, start, end, strand)
+        start = int(res[2].split("-")[0]) + 200
+        end = int(res[1].split("-")[1].split('(')[0]) - 200
+    print("chr_name: ", chr_name, start, end, strand)
     return (chr_name, start, end, strand)
 
 
-def main():
+def main(seq_len, MODEL_VERSION):
     # Global variable definition
     EPOCH_NUM = 20
     BATCH_SIZE = 100
     N_WORKERS = 1
+
     # Selecting device
-    device_str = None
-    if torch.cuda.is_available():
-        device_str = "cuda"
-    else:
-        if platform.system() == "Darwin":
-            device_str = "mps"
-        else:
-            device_str = "cpu"
+    device_str = "cuda" if torch.cuda.is_available() else "mps" if platform.system() == "Darwin" else "cpu"
     device = torch.device(device_str)
     print(f"\033[1m[Info]: Use {device} now!\033[0m")
-    MODEL = "/ccb/cybertron/khchao/splam-analysis-results/model/splam_script.pt"
-    # MODEL = "/ccb/cybertron/khchao/splam-analysis-results/model/splam.pt"
+
     project_root = '/ccb/cybertron/khchao/splam-analysis-results/'
-    MODEL_OUTPUT_BASE = "/ccb/cybertron/khchao/splam-analysis-results/src_tools_evaluation/splam_result/"+MODEL_VERSION+"/"
-    print(">> Using model: ", MODEL)
+    MODEL_OUTPUT_BASE = f'{project_root}train/src/MODEL_TEST/{MODEL_VERSION}_test/'
     os.makedirs(MODEL_OUTPUT_BASE, exist_ok=True)
-    model = torch.load(MODEL)
-    model = model.to(device)
-    # Model Initialization
-    print(f"[Info]: Finish loading model!",flush = True)
+
     criterion = nn.BCELoss()
     BATCH_SIZE = 100
     junc_counter = 0
-    print("########################################")
-    print(" Model: ", model)
-    print("########################################")
-    test_f = f'{project_root}train/results/BAM_TEST_junctions/INPUTS/800bp/input_test_sub_shuffled.fa'
     target = "test_juncs"
-    os.makedirs(MODEL_OUTPUT_BASE+target, exist_ok=True)
-    d_score_tsv_f = MODEL_OUTPUT_BASE+target+"/splam_all_seq.score.d."+target+".tsv"
-    a_score_tsv_f = MODEL_OUTPUT_BASE+target+"/splam_all_seq.score.a."+target+".tsv"
-    name_tsv_f = MODEL_OUTPUT_BASE+target+"/splam_all_seq.name."+target+".tsv"
-    d_score_fw = open(d_score_tsv_f, "a")
-    a_score_fw = open(a_score_tsv_f, "a")
-    # name_fw = open(name_tsv_f, "a")
+    os.makedirs(MODEL_OUTPUT_BASE + target, exist_ok=True)
+    d_score_tsv_f = MODEL_OUTPUT_BASE + target + "/splam_all_seq.score.d." + target + ".tsv"
+    a_score_tsv_f = MODEL_OUTPUT_BASE + target + "/splam_all_seq.score.a." + target + ".tsv"
 
-    test_loader = get_eval_dataloader(BATCH_SIZE, MODEL_VERSION, N_WORKERS, True, target, test_f)
-    print(f"[Info]: Finish loading data!", flush = True)
+    train_loader, val_loader, test_loader = get_train_dataloader(BATCH_SIZE, MODEL_VERSION, seq_len, N_WORKERS)
+    print(f"[Info]: Finish loading data!", flush=True)
     print("valid_iterator: ", len(test_loader))
     LOG_OUTPUT_TEST_BASE = MODEL_OUTPUT_BASE + "/" + target + "/LOG/"
     os.makedirs(LOG_OUTPUT_TEST_BASE, exist_ok=True)
-    ############################
+
     # Log for testing
-    ############################
     OUT_SCORE = LOG_OUTPUT_TEST_BASE + "_junction_score.bed"
     test_log_loss = LOG_OUTPUT_TEST_BASE + "test_loss.txt"
-    test_log_acc = LOG_OUTPUT_TEST_BASE + "test_accuracy.txt"
+    test_log_A_acc = LOG_OUTPUT_TEST_BASE + "test_A_accuracy.txt"
     test_log_A_auprc = LOG_OUTPUT_TEST_BASE + "test_A_auprc.txt"
     test_log_A_threshold_precision = LOG_OUTPUT_TEST_BASE + "test_A_threshold_precision.txt"
     test_log_A_threshold_recall = LOG_OUTPUT_TEST_BASE + "test_A_threshold_recall.txt"
+    test_log_D_acc = LOG_OUTPUT_TEST_BASE + "test_D_accuracy.txt"
     test_log_D_auprc = LOG_OUTPUT_TEST_BASE + "test_D_auprc.txt"
     test_log_D_threshold_precision = LOG_OUTPUT_TEST_BASE + "test_D_threshold_precision.txt"
     test_log_D_threshold_recall = LOG_OUTPUT_TEST_BASE + "test_D_threshold_recall.txt"
     test_log_J_threshold_precision = LOG_OUTPUT_TEST_BASE + "test_J_threshold_precision.txt"
     test_log_J_threshold_recall = LOG_OUTPUT_TEST_BASE + "test_J_threshold_recall.txt"
-    fw_test_log_loss = open(test_log_loss, 'w')
-    fw_test_log_acc = open(test_log_acc, 'w')
-    fw_test_log_A_auprc = open(test_log_A_auprc, 'w')
-    fw_test_log_A_threshold_precision = open(test_log_A_threshold_precision, 'w')
-    fw_test_log_A_threshold_recall = open(test_log_A_threshold_recall, 'w')
-    fw_test_log_D_auprc = open(test_log_D_auprc, 'w')
-    fw_test_log_D_threshold_precision = open(test_log_D_threshold_precision, 'w')
-    fw_test_log_D_threshold_recall = open(test_log_D_threshold_recall, 'w')
-    fw_test_log_J_threshold_precision = open(test_log_J_threshold_precision, 'w')
-    fw_test_log_J_threshold_recall = open(test_log_J_threshold_recall, 'w')
-    fw_junc_scores = open(OUT_SCORE, 'w')
-    epoch_loss = 0
-    epoch_acc = 0
-    epoch_donor_acc = 0
-    epoch_acceptor_acc = 0
-    print("**********************")
-    print("** Testing Dataset **")
-    print("**********************")
-    pbar = tqdm(total=len(test_loader), ncols=0, desc="Test", unit=" step")
 
-    A_G_TP = 1e-6
-    A_G_FN = 1e-6
-    A_G_FP = 1e-6
-    A_G_TN = 1e-6
-    D_G_TP = 1e-6
-    D_G_FN = 1e-6
-    D_G_FP = 1e-6
-    D_G_TN = 1e-6
-    J_G_TP = 1e-6
-    J_G_FN = 1e-6
-    J_G_FP = 1e-6
-    J_G_TN = 1e-6
-    #######################################
-    # Important => setting model into evaluation mode
-    #######################################
-    All_Junction_YL_MIN = []
-    All_Junction_YP_MIN = []
-    All_Junction_YL_AVG = []
-    All_Junction_YP_AVG = []
-    SPLAM_Donor_YL = []
-    SPLAM_Donor_YP = []
-    SPLAM_Acceptor_YL = []
-    SPLAM_Acceptor_YP = []
-    SPLAM_junc_name = []
-    model.eval()
-    for batch_idx, data in enumerate(test_loader):
-        # print("batch_idx: ", batch_idx)
-        # DNAs:  torch.Size([40, 800, 4])
-        # labels:  torch.Size([40, 1, 800, 3])
-        DNAs, labels, chrs = data
-        # name_fw.write(chrs[batch_idx]+"\n")
-        # print("chrs[batch_idx]: ", chrs[batch_idx])
-        # print("chrs: ", chrs)
-        junc_name = map(parse_junction, chrs)
-        junc_name = list(junc_name)
-        DNAs = DNAs.to(torch.float32).to(device)
-        labels = labels.to(torch.float32).to(device)
-        DNAs = torch.permute(DNAs, (0, 2, 1))
-        labels = torch.permute(labels, (0, 2, 1))
-        loss, yp = model_fn(DNAs, labels, model, criterion)
+    with open(d_score_tsv_f, "a") as d_score_fw, open(a_score_tsv_f, "a") as a_score_fw, \
+            open(test_log_loss, 'w') as fw_test_log_loss, open(test_log_A_acc, 'w') as fw_test_log_A_acc, \
+            open(test_log_A_auprc, 'w') as fw_test_log_A_auprc, \
+            open(test_log_A_threshold_precision, 'w') as fw_test_log_A_threshold_precision, \
+            open(test_log_A_threshold_recall, 'w') as fw_test_log_A_threshold_recall, \
+            open(test_log_D_acc, 'w') as fw_test_log_D_acc, open(test_log_D_auprc, 'w') as fw_test_log_D_auprc, \
+            open(test_log_D_threshold_precision, 'w') as fw_test_log_D_threshold_precision, \
+            open(test_log_D_threshold_recall, 'w') as fw_test_log_D_threshold_recall, \
+            open(test_log_J_threshold_precision, 'w') as fw_test_log_J_threshold_precision, \
+            open(test_log_J_threshold_recall, 'w') as fw_test_log_J_threshold_recall:
 
-        #######################################
-        # predicting all bp.
-        #######################################
-        is_expr = (labels.sum(axis=(1,2)) >= 1)
-        # print("is_expr: ", is_expr)
-        # Acceptor_YL = labels[is_expr, 1, :].flatten().to('cpu').detach().numpy()
-        Acceptor_YL = labels[is_expr, 1, :].flatten().to('cpu').detach().numpy()
-        Acceptor_YP = yp[is_expr, 1, :].flatten().to('cpu').detach().numpy()
-        Donor_YL = labels[is_expr, 2, :].flatten().to('cpu').detach().numpy()
-        Donor_YP = yp[is_expr, 2, :].flatten().to('cpu').detach().numpy()
+        for model_idx in range(0, 15):
+            MODEL = f'{project_root}train/src/MODEL/{MODEL_VERSION}/splam_{model_idx}.pt'
+            model = torch.load(MODEL)
+            model = model.to(device)
+            print("########################################")
+            print(" Model: ", model)
+            print("########################################")
+            print(f"[Info]: Finish loading model!", flush=True)
 
-        A_YL = labels[is_expr, 1, :].to('cpu').detach().numpy()
-        A_YP = yp[is_expr, 1, :].to('cpu').detach().numpy()
-        D_YL = labels[is_expr, 2, :].to('cpu').detach().numpy()
-        D_YP = yp[is_expr, 2, :].to('cpu').detach().numpy()
-        np.savetxt(d_score_fw, D_YP, delimiter=" ")
-        np.savetxt(a_score_fw, A_YP, delimiter=" ")
+            epoch_loss = 0
+            epoch_donor_acc = 0
+            epoch_acceptor_acc = 0
+            print("**********************")
+            print("** Testing Dataset **")
+            print("**********************")
+            pbar = tqdm(total=len(test_loader), ncols=0, desc="Test", unit=" step")
+            A_G_TP = 1e-6
+            A_G_FN = 1e-6
+            A_G_FP = 1e-6
+            A_G_TN = 1e-6
+            D_G_TP = 1e-6
+            D_G_FN = 1e-6
+            D_G_FP = 1e-6
+            D_G_TN = 1e-6
+            J_G_TP = 1e-6
+            J_G_FN = 1e-6
+            J_G_FP = 1e-6
+            J_G_TN = 1e-6
 
-        junction_labels_min, junction_scores_min = get_junc_scores(D_YL, A_YL, D_YP, A_YP, "min")
-        junction_labels_avg, junction_scores_avg = get_junc_scores(D_YL, A_YL, D_YP, A_YP, "avg")
-        donor_labels, donor_scores, acceptor_labels, acceptor_scores = get_donor_acceptor_scores(D_YL, A_YL, D_YP, A_YP)
-        SPLAM_Donor_YL = np.concatenate((SPLAM_Donor_YL, donor_labels), axis=None)
-        SPLAM_Donor_YP = np.concatenate((SPLAM_Donor_YP, donor_scores), axis=None)
-        SPLAM_Acceptor_YL = np.concatenate((SPLAM_Acceptor_YL, acceptor_labels), axis=None)
-        SPLAM_Acceptor_YP = np.concatenate((SPLAM_Acceptor_YP, acceptor_scores), axis=None)
-        SPLAM_junc_name.extend(junc_name)
+            model.eval()
+            for batch_idx, data in enumerate(test_loader):
+                DNAs, labels, chrs = data
+                DNAs = DNAs.to(torch.float32).to(device)
+                labels = labels.to(torch.float32).to(device)
+                DNAs = torch.permute(DNAs, (0, 2, 1))
+                labels = torch.permute(labels, (0, 2, 1))
+                loss, yp = model_fn(DNAs, labels, model, criterion)
 
-        All_Junction_YL_MIN.extend(junction_labels_min)
-        All_Junction_YP_MIN.extend(junction_scores_min)
-        All_Junction_YL_AVG.extend(junction_labels_avg)
-        All_Junction_YP_AVG.extend(junction_scores_avg)
+                is_expr = (labels.sum(axis=(1, 2)) >= 1)
+                Acceptor_YL = labels[is_expr, 1, :].flatten().to('cpu').detach().numpy()
+                Acceptor_YP = yp[is_expr, 1, :].flatten().to('cpu').detach().numpy()
+                Donor_YL = labels[is_expr, 2, :].flatten().to('cpu').detach().numpy()
+                Donor_YP = yp[is_expr, 2, :].flatten().to('cpu').detach().numpy()
 
-        J_G_TP, J_G_FN, J_G_FP, J_G_TN, J_TP, J_FN, J_FP, J_TN = print_junc_statistics(D_YL, A_YL, D_YP, A_YP, JUNC_THRESHOLD, J_G_TP, J_G_FN, J_G_FP, J_G_TN)
-        A_accuracy, A_auprc = print_top_1_statistics(Acceptor_YL, Acceptor_YP)
-        D_accuracy, D_auprc = print_top_1_statistics(Donor_YL, Donor_YP)
-        A_G_TP, A_G_FN, A_G_FP, A_G_TN, A_TP, A_FN, A_FP, A_TN = print_threshold_statistics(Acceptor_YL, Acceptor_YP, JUNC_THRESHOLD, A_G_TP, A_G_FN, A_G_FP, A_G_TN)
-        D_G_TP, D_G_FN, D_G_FP, D_G_TN, D_TP, D_FN, D_FP, D_TN = print_threshold_statistics(Donor_YL, Donor_YP, JUNC_THRESHOLD, D_G_TP, D_G_FN, D_G_FP, D_G_TN)
-        batch_loss = loss.item()
-        epoch_loss += loss.item()
-        epoch_donor_acc += D_accuracy
-        epoch_acceptor_acc += A_accuracy
+                A_YL = labels[is_expr, 1, :].to('cpu').detach().numpy()
+                A_YP = yp[is_expr, 1, :].to('cpu').detach().numpy()
+                D_YL = labels[is_expr, 2, :].to('cpu').detach().numpy()
+                D_YP = yp[is_expr, 2, :].to('cpu').detach().numpy()
+                np.savetxt(d_score_fw, D_YP, delimiter=" ")
+                np.savetxt(a_score_fw, A_YP, delimiter=" ")
 
-        for idx in range(len(junc_name)):
-            chr_name, start, end, strand = junc_name[idx]
-            if strand == '+':
-                fw_junc_scores.write(chr_name+ '\t'+ str(start) + '\t' + str(end) + '\tJUNC_' + str(junc_counter) + '\t' + str(donor_labels[idx]) + '\t'+ strand + '\t' + str(donor_scores[idx]) + '\t' + str(acceptor_scores[idx]) + '\n')
-            elif strand == '-':
-                fw_junc_scores.write(chr_name+ '\t'+ str(start) + '\t' + str(end) + '\tJUNC_' + str(junc_counter) + '\t' + str(donor_labels[idx]) + '\t'+ strand+ '\t' + str(donor_scores[idx]) + '\t' + str(acceptor_scores[idx]) + '\n')
-            junc_counter += 1
-        pbar.update(1)
-        pbar.set_postfix(
-            batch_id=batch_idx,
-            idx_test=len(test_loader)*BATCH_SIZE,
-            loss=f"{batch_loss:.6f}",
-            A_auprc = f"{A_auprc:.6f}",
-            D_auprc = f"{D_auprc:.6f}",
-            A_Precision=f"{A_TP/(A_TP+A_FP+1e-6):.6f}",
-            A_Recall=f"{A_TP/(A_TP+A_FN+1e-6):.6f}",
-            D_Precision=f"{D_TP/(D_TP+D_FP+1e-6):.6f}",
-            D_Recall=f"{D_TP/(D_TP+D_FN+1e-6):.6f}",
-            J_Precision=f"{J_TP/(J_TP+J_FP+1e-6):.6f}",
-            J_Recall=f"{J_TP/(J_TP+J_FN+1e-6):.6f}"
-        )
-        fw_test_log_loss.write(str(batch_loss)+ "\n")
-        fw_test_log_A_auprc.write(str(A_auprc)+ "\n")
-        fw_test_log_A_threshold_precision.write(f"{A_TP/(A_TP+A_FP+1e-6):.6f}\n")
-        fw_test_log_A_threshold_recall.write(f"{A_TP/(A_TP+A_FN+1e-6):.6f}\n")
-        fw_test_log_D_auprc.write(str(D_auprc)+ "\n")
-        fw_test_log_D_threshold_precision.write(f"{D_TP/(D_TP+D_FP+1e-6):.6f}\n")
-        fw_test_log_D_threshold_recall.write(f"{D_TP/(D_TP+D_FN+1e-6):.6f}\n")
-        fw_test_log_J_threshold_precision.write(f"{J_TP/(J_TP+J_FP+1e-6):.6f}\n")
-        fw_test_log_J_threshold_recall.write(f"{J_TP/(J_TP+J_FN+1e-6):.6f}\n")
-    pbar.close()
-    fw_junc_scores.close()
-    print(f'Epoch {batch_idx+0:03}: | Loss: {epoch_loss/len(test_loader):.5f} | Donor top-k Acc: {epoch_donor_acc/len(test_loader):.3f} | Acceptor top-k Acc: {epoch_acceptor_acc/len(test_loader):.3f}')
-    print(f'Junction Precision: {J_G_TP/(J_G_TP+J_G_FP):.5f} | Junction Recall: {J_G_TP/(J_G_TP+J_G_FN):.5f} | TP: {J_G_TP} | FN: {J_G_FN} | FP: {J_G_FP} | TN: {J_G_TN}')
-    print(f'Donor Precision   : {D_G_TP/(D_G_TP+D_G_FP):.5f} | Donor Recall   : {D_G_TP/(D_G_TP+D_G_FN):.5f} | TP: {D_G_TP} | FN: {D_G_FN} | FP: {D_G_FP} | TN: {D_G_TN}')
-    print(f'Acceptor Precision: {A_G_TP/(A_G_TP+A_G_FP):.5f} | Acceptor Recall: {A_G_TP/(A_G_TP+A_G_FN):.5f} | TP: {A_G_TP} | FN: {A_G_FN} | FP: {A_G_FP} | TN: {A_G_TN}')
-    print("\n\n")
-    print("All_Junction_YP_MIN: ", len(All_Junction_YP_MIN))
-    print("All_Junction_YL_MIN: ", len(All_Junction_YL_MIN))
-    print("All_Junction_YP_AVG: ", len(All_Junction_YP_AVG))
-    print("All_Junction_YL_AVG: ", len(All_Junction_YL_AVG))
-    print("Donor_YL   : ", len(SPLAM_Donor_YL))
-    print("Donor_YP   : ", len(SPLAM_Donor_YP))
-    print("Acceptor_YL: ", len(SPLAM_Acceptor_YL))
-    print("Acceptor_YP: ", len(SPLAM_Acceptor_YP))
+                donor_labels, donor_scores, acceptor_labels, acceptor_scores = get_donor_acceptor_scores(
+                    D_YL, A_YL, D_YP, A_YP, seq_len)
+                
+                # donor site metric
+                A_G_TP, A_G_FN, A_G_FP, A_G_TN, A_TP, A_FN, A_FP, A_TN = print_splice_site_statistics(A_YL, A_YP, JUNC_THRESHOLD, A_G_TP, A_G_FN, A_G_FP, A_G_TN, seq_len, "acceptor")
+                D_G_TP, D_G_FN, D_G_FP, D_G_TN, D_TP, D_FN, D_FP, D_TN = print_splice_site_statistics(D_YL, D_YP, JUNC_THRESHOLD, D_G_TP, D_G_FN, D_G_FP, D_G_TN, seq_len, "donor")
 
-    with open(MODEL_OUTPUT_BASE +target+ "/splam." + target + ".pkl", 'wb') as f:
-        pickle.dump(All_Junction_YP_MIN, f)
-        pickle.dump(All_Junction_YL_MIN, f)
-        pickle.dump(All_Junction_YP_AVG, f)
-        pickle.dump(All_Junction_YL_AVG, f)
-    with open(MODEL_OUTPUT_BASE +target+ "/splam.da." + target + ".pkl", 'wb') as f:
-        pickle.dump(SPLAM_Donor_YL, f)
-        pickle.dump(SPLAM_Donor_YP, f)
-        pickle.dump(SPLAM_Acceptor_YL, f)
-        pickle.dump(SPLAM_Acceptor_YP, f)
-        pickle.dump(SPLAM_junc_name, f)
-    d_score_fw.close()
-    a_score_fw.close()
-    # name_fw.close()
+                # junction metric
+                J_G_TP, J_G_FN, J_G_FP, J_G_TN, J_TP, J_FN, J_FP, J_TN = print_junc_statistics(
+                    D_YL, A_YL, D_YP, A_YP, JUNC_THRESHOLD, J_G_TP, J_G_FN, J_G_FP, J_G_TN, seq_len)
+                A_accuracy, A_auprc = print_top_1_statistics(Acceptor_YL, Acceptor_YP)
+                D_accuracy, D_auprc = print_top_1_statistics(Donor_YL, Donor_YP)
+                # A_G_TP, A_G_FN, A_G_FP, A_G_TN, A_TP, A_FN, A_FP, A_TN = print_threshold_statistics(
+                #     Acceptor_YL, Acceptor_YP, JUNC_THRESHOLD, A_G_TP, A_G_FN, A_G_FP, A_G_TN)
+                # D_G_TP, D_G_FN, D_G_FP, D_G_TN, D_TP, D_FN, D_FP, D_TN = print_threshold_statistics(
+                #     Donor_YL, Donor_YP, JUNC_THRESHOLD, D_G_TP, D_G_FN, D_G_FP, D_G_TN)
+                batch_loss = loss.item()
+                epoch_loss += loss.item()
+                epoch_donor_acc += D_accuracy
+                epoch_acceptor_acc += A_accuracy
+                pbar.update(1)
+                pbar.set_postfix(
+                    batch_id=batch_idx,
+                    idx_test=len(test_loader) * BATCH_SIZE,
+                    loss=f"{batch_loss:.6f}",
+                    A_accuracy=f"{A_accuracy:.6f}",
+                    D_accuracy=f"{D_accuracy:.6f}",
+                    A_auprc=f"{A_auprc:.6f}",
+                    D_auprc=f"{D_auprc:.6f}",
+                    A_Precision=f"{A_TP / (A_TP + A_FP + 1e-6):.6f}",
+                    A_Recall=f"{A_TP / (A_TP + A_FN + 1e-6):.6f}",
+                    D_Precision=f"{D_TP / (D_TP + D_FP + 1e-6):.6f}",
+                    D_Recall=f"{D_TP / (D_TP + D_FN + 1e-6):.6f}",
+                    J_Precision=f"{J_TP / (J_TP + J_FP + 1e-6):.6f}",
+                    J_Recall=f"{J_TP / (J_TP + J_FN + 1e-6):.6f}"
+                )
+                fw_test_log_loss.write(str(batch_loss) + "\n")
+                fw_test_log_A_acc.write(str(A_accuracy) + "\n")
+                fw_test_log_A_auprc.write(str(A_auprc) + "\n")
+                fw_test_log_A_threshold_precision.write(f"{A_TP / (A_TP + A_FP + 1e-6):.6f}\n")
+                fw_test_log_A_threshold_recall.write(f"{A_TP / (A_TP + A_FN + 1e-6):.6f}\n")
+                fw_test_log_D_acc.write(str(D_accuracy) + "\n")
+                fw_test_log_D_auprc.write(str(D_auprc) + "\n")
+                fw_test_log_D_threshold_precision.write(f"{D_TP / (D_TP + D_FP + 1e-6):.6f}\n")
+                fw_test_log_D_threshold_recall.write(f"{D_TP / (D_TP + D_FN + 1e-6):.6f}\n")
+                fw_test_log_J_threshold_precision.write(f"{J_TP / (J_TP + J_FP + 1e-6):.6f}\n")
+                fw_test_log_J_threshold_recall.write(f"{J_TP / (J_TP + J_FN + 1e-6):.6f}\n")
+            pbar.close()
+            print(f'Epoch {batch_idx + 0:03}: | Loss: {epoch_loss / len(test_loader):.5f} | '
+                  f'Donor top-k Acc: {epoch_donor_acc / len(test_loader):.3f} | '
+                  f'Acceptor top-k Acc: {epoch_acceptor_acc / len(test_loader):.3f}')
+            print(f'Junction Precision: {J_G_TP / (J_G_TP + J_G_FP):.5f} | '
+                  f'Junction Recall: {J_G_TP / (J_G_TP + J_G_FN):.5f} | '
+                  f'TP: {J_G_TP} | FN: {J_G_FN} | FP: {J_G_FP} | TN: {J_G_TN}')
+            print(f'Donor Precision   : {D_G_TP / (D_G_TP + D_G_FP):.5f} | '
+                  f'Donor Recall   : {D_G_TP / (D_G_TP + D_G_FN):.5f} | '
+                  f'TP: {D_G_TP} | FN: {D_G_FN} | FP: {D_G_FP} | TN: {D_G_TN}')
+            print(f'Acceptor Precision: {A_G_TP / (A_G_TP + A_G_FP):.5f} | '
+                  f'Acceptor Recall: {A_G_TP / (A_G_TP + A_G_FN):.5f} | '
+                  f'TP: {A_G_TP} | FN: {A_G_FN} | FP: {A_G_FP} | TN: {A_G_TN}')
+            print("\n\n")
+
 
 def plot_pr_curve(true_y, y_prob, label):
     """
@@ -279,6 +207,7 @@ def plot_pr_curve(true_y, y_prob, label):
     plt.legend()
     plt.xlabel('Recall')
     plt.ylabel('Precision')
+
 
 def plot_roc_curve(true_y, y_prob, label):
     """
@@ -292,4 +221,7 @@ def plot_roc_curve(true_y, y_prob, label):
 
 
 if __name__ == "__main__":
-    main()
+    # Testing Splam model with different sequence length
+    for seq_len in [200, 400, 600, 800]:
+        MODEL_VERSION = f'Splam_{seq_len}'
+        main(seq_len, MODEL_VERSION)

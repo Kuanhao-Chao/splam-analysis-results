@@ -205,6 +205,30 @@ def get_junc_scores(D_YL, A_YL, D_YP, A_YP, choice, seq_len):
     return junc_labels, junc_scores
 
 
+def print_splice_site_statistics(YL, YP, threshold, TOTAL_TP, TOTAL_FN, TOTAL_FP, TOTAL_TN, seq_len, choice):
+    if choice == "donor":
+        label_junc_idx = (YL[:, seq_len//4]==1)
+        label_nonjunc_idx = (YL[:, seq_len//4]==0)
+        predict_junc_idx = (YP[:, seq_len//4]>=threshold)
+        predict_nonjunc_idx = (YP[:, seq_len//4]<threshold)
+    elif choice == "acceptor":
+        label_junc_idx = (YL[:, seq_len//4*3]==1)
+        label_nonjunc_idx = (YL[:, seq_len//4*3]==0)
+        predict_junc_idx = (YP[:, seq_len//4*3]>=threshold)
+        predict_nonjunc_idx = (YP[:, seq_len//4*3]<threshold)
+    idx_true = np.nonzero(label_junc_idx == True)[0]
+    idx_pred = np.nonzero(predict_junc_idx == True)[0]
+    LCL_TOTAL_TP = np.size(np.intersect1d(idx_true, idx_pred))
+    LCL_TOTAL_FN = len(idx_true) - LCL_TOTAL_TP
+    LCL_TOTAL_FP = len(idx_pred) - LCL_TOTAL_TP
+    LCL_TOTAL_TN = len(YL) - LCL_TOTAL_TP - LCL_TOTAL_FN - LCL_TOTAL_FP
+    TOTAL_TP += LCL_TOTAL_TP
+    TOTAL_FN += LCL_TOTAL_FN
+    TOTAL_FP += LCL_TOTAL_FP
+    TOTAL_TN += LCL_TOTAL_TN
+    return TOTAL_TP, TOTAL_FN, TOTAL_FP, TOTAL_TN, LCL_TOTAL_TP, LCL_TOTAL_FN, LCL_TOTAL_FP, LCL_TOTAL_TN
+
+
 def print_junc_statistics(D_YL, A_YL, D_YP, A_YP, threshold, TOTAL_TP, TOTAL_FN, TOTAL_FP, TOTAL_TN, seq_len):
     label_junc_idx = (D_YL[:, seq_len//4]==1) & (A_YL[:, seq_len//4*3]==1)
     label_nonjunc_idx = (D_YL[:, seq_len//4]==0) & (A_YL[:, seq_len//4*3]==0)

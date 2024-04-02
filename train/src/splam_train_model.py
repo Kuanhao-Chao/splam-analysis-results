@@ -22,14 +22,12 @@ N_WORKERS = 1
 L = 64
 SEQ_LEN = sys.argv[1]
 JUNC_THRESHOLD = 0.1
-
 W = np.asarray([11, 11, 11, 11, 11, 11, 11, 11,
                 11, 11, 11, 11, 21, 21, 21, 21,
                 21, 21, 21, 21])
 AR = np.asarray([1, 1, 1, 1, 5, 5, 5, 5,
                  10, 10, 10, 10, 15, 15, 15, 15,
                 20, 20, 20, 20])
-
 CL = 2 * np.sum(AR*(W-1))
 print("\033[1mSequence length (input nucleotides): %d\033[0m" % (SL))
 same_seeds(0)
@@ -62,7 +60,8 @@ print("######################################################\n")
 #############################
 # Creating directories
 #############################
-MODEL_VERSION = f'Splam_{SEQ_LEN}/'
+# MODEL_VERSION = f'Splam_{SEQ_LEN}/'
+MODEL_VERSION = f'Retrain/'
 MODEL_OUTPUT_BASE = "./MODEL/"+MODEL_VERSION
 LOG_OUTPUT_BASE = MODEL_OUTPUT_BASE + "LOG/"
 LOG_OUTPUT_TRAIN_BASE = MODEL_OUTPUT_BASE + "LOG/TRAIN/"
@@ -76,15 +75,12 @@ os.makedirs(LOG_OUTPUT_TEST_BASE, exist_ok=True)
 #############################
 # Training Data initialization
 #############################
-# save_dataloader(BATCH_SIZE, MODEL_VERSION, N_WORKERS)
 train_loader, val_loader, test_loader = get_train_dataloader(BATCH_SIZE, MODEL_VERSION, SEQ_LEN, N_WORKERS)
 train_iterator = iter(train_loader)
-# valid_iterator = iter(val_loader)
 test_iterator = iter(test_loader)
 print(f"\033[1m[Info]: Finish loading data!\033[0m",flush = True)
 print("train_iterator: ", len(train_loader))
-# print("valid_iterator: ", len(val_loader))
-print("valid_iterator: ", len(test_loader))
+print("test_iterator: ", len(test_loader))
 
 #############################
 # Initialize scheduler
@@ -96,22 +92,24 @@ print(f"[Info]: Initialized the scheduler! Warmup steps: ", 1000, ";  Total step
 # Log for training
 ############################
 train_log_loss = LOG_OUTPUT_TRAIN_BASE + "train_loss.txt"
-train_log_acc = LOG_OUTPUT_TRAIN_BASE + "train_accuracy.txt"
 train_log_lr = LOG_OUTPUT_TRAIN_BASE + "train_lr.txt"
+train_log_A_acc = LOG_OUTPUT_TRAIN_BASE + "train_A_accuracy.txt"
 train_log_A_auprc = LOG_OUTPUT_TRAIN_BASE + "train_A_auprc.txt"
 train_log_A_threshold_precision = LOG_OUTPUT_TRAIN_BASE + "train_A_threshold_precision.txt"
 train_log_A_threshold_recall = LOG_OUTPUT_TRAIN_BASE + "train_A_threshold_recall.txt"
+train_log_D_acc = LOG_OUTPUT_TRAIN_BASE + "train_D_accuracy.txt"
 train_log_D_auprc = LOG_OUTPUT_TRAIN_BASE + "train_D_auprc.txt"
 train_log_D_threshold_precision = LOG_OUTPUT_TRAIN_BASE + "train_D_threshold_precision.txt"
 train_log_D_threshold_recall = LOG_OUTPUT_TRAIN_BASE + "train_D_threshold_recall.txt"
 train_log_J_threshold_precision = LOG_OUTPUT_TRAIN_BASE + "train_J_threshold_precision.txt"
 train_log_J_threshold_recall = LOG_OUTPUT_TRAIN_BASE + "train_J_threshold_recall.txt"
 fw_train_log_loss = open(train_log_loss, 'w')
-fw_train_log_acc = open(train_log_acc, 'w')
 fw_train_log_lr = open(train_log_lr, 'w')
+fw_train_log_A_acc = open(train_log_A_acc, 'w')
 fw_train_log_A_auprc = open(train_log_A_auprc, 'w')
 fw_train_log_A_threshold_precision = open(train_log_A_threshold_precision, 'w')
 fw_train_log_A_threshold_recall = open(train_log_A_threshold_recall, 'w')
+fw_train_log_D_acc = open(train_log_D_acc, 'w')
 fw_train_log_D_auprc = open(train_log_D_auprc, 'w')
 fw_train_log_D_threshold_precision = open(train_log_D_threshold_precision, 'w')
 fw_train_log_D_threshold_recall = open(train_log_D_threshold_recall, 'w')
@@ -198,7 +196,6 @@ def train_one_epoch(epoch_idx, train_loader):
     #######################################   
     model.train()
     for batch_idx, data in enumerate(train_loader):
-        # print("batch_idx: ", batch_idx)
         # DNAs:  torch.Size([40, seq_len, 4])
         # labels:  torch.Size([40, 1, seq_len, 3])
         DNAs, labels, chr = data 
@@ -211,7 +208,6 @@ def train_one_epoch(epoch_idx, train_loader):
         # predicting all bp.
         #######################################    
         is_expr = (labels.sum(axis=(1,2)) >= 1)
-        # Acceptor_YL = labels[is_expr, 1, :].flatten().to('cpu').detach().numpy()
         Acceptor_YL = labels[is_expr, 1, :].flatten().to('cpu').detach().numpy()
         Acceptor_YP = yp[is_expr, 1, :].flatten().to('cpu').detach().numpy()
         Donor_YL = labels[is_expr, 2, :].flatten().to('cpu').detach().numpy()
@@ -220,9 +216,12 @@ def train_one_epoch(epoch_idx, train_loader):
         A_YP = yp[is_expr, 1, :].to('cpu').detach().numpy()
         D_YL = labels[is_expr, 2, :].to('cpu').detach().numpy()
         D_YP = yp[is_expr, 2, :].to('cpu').detach().numpy()
+        # Junction Level metrics
         J_G_TP, J_G_FN, J_G_FP, J_G_TN, J_TP, J_FN, J_FP, J_TN = print_junc_statistics(D_YL, A_YL, D_YP, A_YP, JUNC_THRESHOLD, J_G_TP, J_G_FN, J_G_FP, J_G_TN, int(SEQ_LEN))
+        # Splice site level - topk 
         A_accuracy, A_auprc = print_top_1_statistics(Acceptor_YL, Acceptor_YP)
         D_accuracy, D_auprc = print_top_1_statistics(Donor_YL, Donor_YP)
+        # Splice site level - Given threshold 0.5 
         A_G_TP, A_G_FN, A_G_FP, A_G_TN, A_TP, A_FN, A_FP, A_TN = print_threshold_statistics(Acceptor_YL, Acceptor_YP, JUNC_THRESHOLD, A_G_TP, A_G_FN, A_G_FP, A_G_TN)
         D_G_TP, D_G_FN, D_G_FP, D_G_TN, D_TP, D_FN, D_FP, D_TN = print_threshold_statistics(Donor_YL, Donor_YP, JUNC_THRESHOLD, D_G_TP, D_G_FN, D_G_FP, D_G_TN)
         batch_loss = loss.item()
@@ -249,9 +248,11 @@ def train_one_epoch(epoch_idx, train_loader):
         optimizer.zero_grad()
         fw_train_log_loss.write(str(batch_loss)+ "\n")
         fw_train_log_lr.write(str(get_lr(optimizer))+ "\n")
+        fw_train_log_A_acc.write(str(A_accuracy)+ "\n")
         fw_train_log_A_auprc.write(str(A_auprc)+ "\n")
         fw_train_log_A_threshold_precision.write(f"{A_TP/(A_TP+A_FP+1e-6):.6f}\n")
         fw_train_log_A_threshold_recall.write(f"{A_TP/(A_TP+A_FN+1e-6):.6f}\n")
+        fw_train_log_D_acc.write(str(D_accuracy)+ "\n")
         fw_train_log_D_auprc.write(str(D_auprc)+ "\n")
         fw_train_log_D_threshold_precision.write(f"{D_TP/(D_TP+D_FP+1e-6):.6f}\n")
         fw_train_log_D_threshold_recall.write(f"{D_TP/(D_TP+D_FN+1e-6):.6f}\n")
@@ -327,6 +328,8 @@ def val_one_epoch(epoch_idx, val_loader):
             batch_id=batch_idx,
             idx_val=len(val_loader)*BATCH_SIZE,
             loss=f"{batch_loss:.6f}",
+            A_topk_accu = f"{A_accuracy:.6f}",
+            D_topk_accu = f"{D_accuracy:.6f}",
             A_auprc = f"{A_auprc:.6f}",
             D_auprc = f"{D_auprc:.6f}",
             A_Precision=f"{A_TP/(A_TP+A_FP+1e-6):.6f}",
@@ -449,10 +452,8 @@ def main():
     # Model Training
     #############################
     print("In main function")
-
     for epoch_num in range(EPOCH_NUM):
         train_one_epoch(epoch_num, train_loader)
-        # val_one_epoch(epoch_num, val_loader)
         test_one_epoch(epoch_num, test_loader)
         torch.save(model, MODEL_OUTPUT_BASE+'splam_'+str(epoch_num)+'.pt')
     fw_train_log_loss.close()

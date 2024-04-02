@@ -103,7 +103,7 @@ class myDatasetTrain(Dataset):
                         print(Y.size())
                     self.data.append([X, Y, seq_name])
                 pp_MANE_idx += 1
-                if pp_MANE_idx %20000 == 0:
+                if pp_MANE_idx %30000 == 0:
                     print("\tpp_MANE_idx: ", pp_MANE_idx)
                     break
         print("\tpp_MANE_idx: ", pp_MANE_idx)
@@ -130,7 +130,7 @@ class myDatasetTrain(Dataset):
                         print(Y.size())
                     self.data.append([X, Y, seq_name])
                 pp_alts_idx += 1
-                if pp_alts_idx %20000 == 0:
+                if pp_alts_idx %30000 == 0:
                     print("\tpp_alts_idx: ", pp_alts_idx)
                     break
         print("\tpp_alts_idx: ", pp_alts_idx)
