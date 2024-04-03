@@ -26,10 +26,10 @@ def visualize_test_seqlen_vary_study(window_size):
         for metric in metrics:
             scores_dict[f'{res}_{metric}'] = {}
             print(f'{res}; {metric}')
-            for seq_len in [200, 400, 600, 800]:
+            for seq_len in [40, 100, 200, 400, 600, 800]:
                 key = f'Splam_{seq_len}'
                 # scores_key = f'{exp}_{rs_value}'
-                key_dir = f'{albation_study_root}{key}/test_juncs/'
+                key_dir = f'{albation_study_root}{key}_test/test_juncs/'
                 file_path = f'{key_dir}LOG/{res.lower()}{metric}'
                 print("file_path: ", file_path)
                 if os.path.exists(file_path):
@@ -57,7 +57,7 @@ def visualize_test_seqlen_vary_study(window_size):
                 scores_dict[f1_key][scores_key] = f1_scores
 
     # Visualization
-    fig, axs = plt.subplots(len(res_type), len(metrics), figsize=(40,8), dpi=800)  # Adjusted figsize and added dpi for clarity
+    fig, axs = plt.subplots(len(res_type), len(metrics), figsize=(30,7.5), dpi=800)  # Adjusted figsize and added dpi for clarity
     for i, res in enumerate(res_type):
         for j, metric in enumerate(metrics):
             ax = axs[j]
@@ -72,12 +72,23 @@ def visualize_test_seqlen_vary_study(window_size):
                                 ax.plot(smoothed_scores, label=scores_key)
                             else:
                                 ax.plot(scores, label=scores_key)  # Plot raw data if too short for smoothing
-                ax.set_title(f'{res} {metric}', fontsize=27)  # Larger title
-                ax.set_xlabel('X-axis Label', fontsize=16)  # X-axis label size
-                ax.set_ylabel('Y-axis Label', fontsize=16)  # Y-axis label size
+                metric_name = ""
+                if "accuracy" in metric:
+                    metric_name = "Top-k Accuracy"
+                elif "auprc" in metric:
+                    metric_name = "AUPRC"
+                elif "precision" in metric:
+                    metric_name = "Precision"
+                elif "recall" in metric:
+                    metric_name = "Recall"
+                elif "f1" in metric:
+                    metric_name = "F1"
+                ax.set_title(f'{metric_name}', fontsize=35)  # Larger title
+                ax.set_xlabel('Steps', fontsize=20)  # X-axis label size
+                ax.set_ylabel('Scores', fontsize=20)  # Y-axis label size
                 ax.tick_params(axis='both', which='major', labelsize=12)  # Adjust tick size for both axes
                 ax.legend(fontsize=12)  # Adjust legend font size
-                ax.set_ylim([0, 1])  # Set y-axis scale from 0 to 1
+                ax.set_ylim([0.5, 1])  # Set y-axis scale from 0 to 1
             else:
                 ax.set_title(f'{res}_{metric} (No Data)', fontsize=16)  # Larger title
                 ax.axis('off')

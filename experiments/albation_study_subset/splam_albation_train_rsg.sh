@@ -5,11 +5,11 @@
 #     python splam_albation_train.py --rsg $rsg --rsb $rsb
 # done
 
-for rsg in 1 2 3 4
+for rsg in 1 2 3 4 5
 do 
     rsb=4
     echo python splam_albation_train.py --rsg $rsg --rsb $rsb
-    python splam_albation_train.py --rsg $rsg --rsb $rsb
+    # python splam_albation_train.py --rsg $rsg --rsb $rsb
 done
 
 # rsg=5

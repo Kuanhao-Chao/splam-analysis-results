@@ -22,6 +22,7 @@ build/
 private/
 
 # train 
+train/src/MODEL*
 train/src/MODEL/
 train/src/MODEL_TEST/
 train/src/INPUTS/Intersection/

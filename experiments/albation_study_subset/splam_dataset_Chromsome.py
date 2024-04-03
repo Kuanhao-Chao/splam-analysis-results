@@ -8,17 +8,18 @@ import math
 
 from splam_utils import *
 # MODEL_VERSION
-SEQ_LEN = "800"
+
 project_root = '/ccb/cybertron/khchao/splam-analysis-results/'
 def split_seq_name(seq):
     return seq[1:]
+
 
 class myDatasetEval(Dataset):
     def __init__(self, type, segment_len=800, shuffle=True, eval_select=None, test_f=""):
         print("!!shuffle: ", shuffle, eval_select)
         self.segment_len = segment_len
         self.data = []
-        CONSTANT_SIZE_NEG = 10000
+        CONSTANT_SIZE_NEG = 20000
         if type == "eval":
             #################################
             ## Processing 'NEGATIVE_1' samples
@@ -34,15 +35,15 @@ class myDatasetEval(Dataset):
                         seq_name = split_seq_name(line)
                     elif nidx % 2 == 1:
                         seq = line
-                        X, Y = create_datapoints(seq, '-')
+                        X, Y = create_datapoints(seq, '-', segment_len)
                         X = torch.Tensor(np.array(X))
                         Y = torch.Tensor(np.array(Y)[0])
-                        if X.size()[0] != 800:
+                        if X.size()[0] != int(segment_len):
                             print(X.size())
                             print(Y.size())
                         self.data.append([X, Y, seq_name])
                     nidx += 1
-                    if nidx %10000 == 0:
+                    if nidx %20000 == 0:
                         print("nidx: ", nidx)
                     if nidx >= CONSTANT_SIZE_NEG:
                         break
@@ -68,20 +69,19 @@ class myDatasetTrain(Dataset):
     def __init__(self, process_type, segment_len=800, shuffle=True, eval_select=None, idx=0):
         self.segment_len = segment_len
         self.data = []
-        CONSTANT_SIZE = 0
-        CONSTANT_SIZE_NEG = 0
         if process_type == "train":
             pos_MANE_f = f'{project_root}/train/results/train_test_dataset/input_pos_mane/{segment_len}bp/train_pos_mane.shuffle.fa'
             pos_ALTS_f = f'{project_root}/train/results/train_test_dataset/input_pos_alts/{segment_len}bp/train_pos_alts.shuffle.fa'
             neg_1_f = f'{project_root}/train/results/train_test_dataset/input_neg_1/{segment_len}bp/train_neg_1.shuffle.fa'
             neg_random_f = f'{project_root}/train/results/train_test_dataset/input_neg_random/{segment_len}bp/train_neg_random.shuffle.fa'
-            CONSTANT_SIZE = 30000
+            CONSTANT_SIZE = 20000
         elif process_type == "test":
             pos_MANE_f = f'{project_root}/train/results/train_test_dataset/input_pos_mane/{segment_len}bp/test_pos_mane.shuffle.fa'
             pos_ALTS_f = f'{project_root}/train/results/train_test_dataset/input_pos_alts/{segment_len}bp/test_pos_alts.shuffle.fa'
             neg_1_f = f'{project_root}/train/results/train_test_dataset/input_neg_1/{segment_len}bp/test_neg_1.shuffle.fa'
             neg_random_f = f'{project_root}/train/results/train_test_dataset/input_neg_random/{segment_len}bp/test_neg_random.shuffle.fa'
-            CONSTANT_SIZE = 10000
+            CONSTANT_SIZE = 20000
+        CONSTANT_SIZE_NEG = 0
         #################################
         ## Processing 'Positive_MANE' samples
         #################################
@@ -96,10 +96,10 @@ class myDatasetTrain(Dataset):
                     seq_name = split_seq_name(line)
                 elif pp_MANE_idx % 2 == 1:
                     seq = line
-                    X, Y = create_datapoints(seq, '+')
+                    X, Y = create_datapoints(seq, '+', segment_len)
                     X = torch.Tensor(np.array(X))
                     Y = torch.Tensor(np.array(Y)[0])
-                    if X.size()[0] != 800:
+                    if X.size()[0] != int(segment_len):
                         print("seq_name: ", seq_name)
                         print(X.size())
                         print(Y.size())
@@ -124,10 +124,10 @@ class myDatasetTrain(Dataset):
                     seq_name = split_seq_name(line)
                 elif pp_alts_idx % 2 == 1:
                     seq = line
-                    X, Y = create_datapoints(seq, '+')
+                    X, Y = create_datapoints(seq, '+', segment_len)
                     X = torch.Tensor(np.array(X))
                     Y = torch.Tensor(np.array(Y)[0])
-                    if X.size()[0] != 800:
+                    if X.size()[0] != int(segment_len):
                         print("seq_name: ", seq_name)
                         print(X.size())
                         print(Y.size())
@@ -155,16 +155,16 @@ class myDatasetTrain(Dataset):
                     seq_name = split_seq_name(line)
                 elif n1idx % 2 == 1:
                     seq = line
-                    X, Y = create_datapoints(seq, '-')
+                    X, Y = create_datapoints(seq, '-', segment_len)
                     X = torch.Tensor(np.array(X))
                     Y = torch.Tensor(np.array(Y)[0])
-                    if X.size()[0] != 800:
+                    if X.size()[0] != int(segment_len):
                         print("seq_name: ", seq_name)
                         print(X.size())
                         print(Y.size())
                     self.data.append([X, Y, seq_name])
                 n1idx += 1
-                if n1idx %10000 == 0:
+                if n1idx %20000 == 0:
                     print("\tn1idx: ", n1idx)
                 if n1idx >= CONSTANT_SIZE_NEG:
                     break
@@ -183,16 +183,16 @@ class myDatasetTrain(Dataset):
                     seq_name = split_seq_name(line)
                 elif nridx % 2 == 1:
                     seq = line
-                    X, Y = create_datapoints(seq, '-')
+                    X, Y = create_datapoints(seq, '-', segment_len)
                     X = torch.Tensor(np.array(X))
                     Y = torch.Tensor(np.array(Y)[0])
-                    if X.size()[0] != 800:
+                    if X.size()[0] != int(segment_len):
                         print("seq_name: ", seq_name)
                         print(X.size())
                         print(Y.size())
                     self.data.append([X, Y, seq_name])
                 nridx += 1
-                if nridx %10000 == 0:
+                if nridx %20000 == 0:
                     print("\tnridx: ", nridx)
                 if nridx >= CONSTANT_SIZE_NEG:
                     break
@@ -214,11 +214,10 @@ class myDatasetTrain(Dataset):
         return feature, label, seq_name
 
 
-def get_train_dataloader(batch_size, TARGET, n_workers):
+def get_train_dataloader(batch_size, TARGET, SEQ_LEN, n_workers):
     """Generate dataloader"""
     trainset_origin = myDatasetTrain("train", int(SEQ_LEN))
     trainset, valset = torch.utils.data.random_split(trainset_origin, [0.9, 0.1])
-    # trainset = myDatasetTrain("train", int(SEQ_LEN))
     testset = myDatasetTrain("test", int(SEQ_LEN))
     train_loader = DataLoader(
         trainset,
@@ -244,9 +243,6 @@ def get_train_dataloader(batch_size, TARGET, n_workers):
     # predicting splice / non-splice
     #######################################
     return train_loader, val_loader, test_loader
-    # torch.save(train_loader, "./INPUTS/"+SEQ_LEN+"bp/"+TARGET+"/train.pt")
-    # torch.save(val_loader, "./INPUTS/"+SEQ_LEN+"bp/"+TARGET+"/val.pt")
-    # torch.save(test_loader, "./INPUTS/"+SEQ_LEN+"bp/"+TARGET+"/test.pt")
 
 
 def get_test_dataloader(batch_size, TARGET, n_workers, shuffle):
@@ -265,7 +261,6 @@ def get_test_dataloader(batch_size, TARGET, n_workers, shuffle):
     # test_loader = torch.load("./INPUTS/"+SEQ_LEN+"bp/"+TARGET+"/test.pt")
     return test_loader
 
-
 def get_eval_dataloader(batch_size, TARGET, n_workers, shuffle, eval_select, test_f):
     #######################################
     # predicting splice / non-splice
@@ -282,3 +277,4 @@ def get_eval_dataloader(batch_size, TARGET, n_workers, shuffle, eval_select, tes
     print(f'[INFO] Loading dataset (shuffle: {test_f}')
     torch.save(test_loader, f'{dataLoader}')
     return test_loader
+

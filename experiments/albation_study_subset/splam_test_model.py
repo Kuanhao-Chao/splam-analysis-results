@@ -61,11 +61,7 @@ def main(MODEL_VERSION):
     junc_counter = 0
     target = "test_juncs"
     os.makedirs(MODEL_OUTPUT_BASE+target, exist_ok=True)
-    d_score_tsv_f = MODEL_OUTPUT_BASE+target+"/splam_all_seq.score.d."+target+".tsv"
-    a_score_tsv_f = MODEL_OUTPUT_BASE+target+"/splam_all_seq.score.a."+target+".tsv"
-    d_score_fw = open(d_score_tsv_f, "a")
-    a_score_fw = open(a_score_tsv_f, "a")
-    train_loader, val_loader, test_loader = get_train_dataloader(BATCH_SIZE, MODEL_VERSION, N_WORKERS)
+    train_loader, val_loader, test_loader = get_train_dataloader(BATCH_SIZE, MODEL_VERSION, 800, 1)
     print(f"[Info]: Finish loading data!", flush = True)
     print("valid_iterator: ", len(test_loader))
     LOG_OUTPUT_TEST_BASE = MODEL_OUTPUT_BASE + "/" + target + "/LOG/"
@@ -100,7 +96,7 @@ def main(MODEL_VERSION):
     fw_test_log_J_threshold_recall = open(test_log_J_threshold_recall, 'w')
 
     for model_idx in range(0, 15):
-        MODEL = f'/ccb/cybertron/khchao/splam-analysis-results/results/albation_study/MODEL/subset_10000/{MODEL_VERSION}/splam_{model_idx}.pt'
+        MODEL = f'{project_root}results/albation_study/MODEL/subset_20000/{MODEL_VERSION}/splam_{model_idx}.pt'
         model = torch.load(MODEL)
         model = model.to(device)
         print("########################################")
@@ -152,20 +148,32 @@ def main(MODEL_VERSION):
             A_YL = labels[is_expr, 1, :].to('cpu').detach().numpy()
             A_YP = yp[is_expr, 1, :].to('cpu').detach().numpy()
             D_YL = labels[is_expr, 2, :].to('cpu').detach().numpy()
-            D_YP = yp[is_expr, 2, :].to('cpu').detach().numpy()
-            np.savetxt(d_score_fw, D_YP, delimiter=" ")
-            np.savetxt(a_score_fw, A_YP, delimiter=" ")
+            D_YP = yp[is_expr, 2, :].to('cpu').detach().numpy()        
 
-            donor_labels, donor_scores, acceptor_labels, acceptor_scores = get_donor_acceptor_scores(D_YL, A_YL, D_YP, A_YP)
+            donor_labels, donor_scores, acceptor_labels, acceptor_scores = get_donor_acceptor_scores(
+                D_YL, A_YL, D_YP, A_YP, 800)
+            
+            # donor site metric
+            A_G_TP, A_G_FN, A_G_FP, A_G_TN, A_TP, A_FN, A_FP, A_TN = print_splice_site_statistics(A_YL, A_YP, JUNC_THRESHOLD, A_G_TP, A_G_FN, A_G_FP, A_G_TN, 800, "acceptor")
+            D_G_TP, D_G_FN, D_G_FP, D_G_TN, D_TP, D_FN, D_FP, D_TN = print_splice_site_statistics(D_YL, D_YP, JUNC_THRESHOLD, D_G_TP, D_G_FN, D_G_FP, D_G_TN, 800, "donor")
 
-            # Junction statistics
-            J_G_TP, J_G_FN, J_G_FP, J_G_TN, J_TP, J_FN, J_FP, J_TN = print_junc_statistics(D_YL, A_YL, D_YP, A_YP, JUNC_THRESHOLD, J_G_TP, J_G_FN, J_G_FP, J_G_TN)
-            # Top-k statistics
+            # junction metric
+            J_G_TP, J_G_FN, J_G_FP, J_G_TN, J_TP, J_FN, J_FP, J_TN = print_junc_statistics(
+                D_YL, A_YL, D_YP, A_YP, JUNC_THRESHOLD, J_G_TP, J_G_FN, J_G_FP, J_G_TN, 800)
             A_accuracy, A_auprc = print_top_1_statistics(Acceptor_YL, Acceptor_YP)
             D_accuracy, D_auprc = print_top_1_statistics(Donor_YL, Donor_YP)
-            # Donor and Acceptor statistics
-            A_G_TP, A_G_FN, A_G_FP, A_G_TN, A_TP, A_FN, A_FP, A_TN = print_threshold_statistics(Acceptor_YL, Acceptor_YP, JUNC_THRESHOLD, A_G_TP, A_G_FN, A_G_FP, A_G_TN)
-            D_G_TP, D_G_FN, D_G_FP, D_G_TN, D_TP, D_FN, D_FP, D_TN = print_threshold_statistics(Donor_YL, Donor_YP, JUNC_THRESHOLD, D_G_TP, D_G_FN, D_G_FP, D_G_TN)
+            
+            
+            # donor_labels, donor_scores, acceptor_labels, acceptor_scores = get_donor_acceptor_scores(D_YL, A_YL, D_YP, A_YP, 800)
+
+            # # Junction statistics
+            # J_G_TP, J_G_FN, J_G_FP, J_G_TN, J_TP, J_FN, J_FP, J_TN = print_junc_statistics(D_YL, A_YL, D_YP, A_YP, JUNC_THRESHOLD, J_G_TP, J_G_FN, J_G_FP, J_G_TN)
+            # # Top-k statistics
+            # A_accuracy, A_auprc = print_top_1_statistics(Acceptor_YL, Acceptor_YP)
+            # D_accuracy, D_auprc = print_top_1_statistics(Donor_YL, Donor_YP)
+            # # Donor and Acceptor statistics
+            # A_G_TP, A_G_FN, A_G_FP, A_G_TN, A_TP, A_FN, A_FP, A_TN = print_threshold_statistics(Acceptor_YL, Acceptor_YP, JUNC_THRESHOLD, A_G_TP, A_G_FN, A_G_FP, A_G_TN)
+            # D_G_TP, D_G_FN, D_G_FP, D_G_TN, D_TP, D_FN, D_FP, D_TN = print_threshold_statistics(Donor_YL, Donor_YP, JUNC_THRESHOLD, D_G_TP, D_G_FN, D_G_FP, D_G_TN)
             batch_loss = loss.item()
             epoch_loss += loss.item()
             epoch_donor_acc += D_accuracy
@@ -206,8 +214,6 @@ def main(MODEL_VERSION):
         print(f'Acceptor Precision: {A_G_TP/(A_G_TP+A_G_FP):.5f} | Acceptor Recall: {A_G_TP/(A_G_TP+A_G_FN):.5f} | TP: {A_G_TP} | FN: {A_G_FN} | FP: {A_G_FP} | TN: {A_G_TN}')
         print("\n\n")
 
-    d_score_fw.close()
-    a_score_fw.close()
     fw_test_log_loss.close()
     fw_test_log_A_acc.close()
     fw_test_log_A_auprc.close()
@@ -251,6 +257,6 @@ if __name__ == "__main__":
     #     main(MODEL_VERSION)
 
     rsb = 4
-    for rsg in range(5, 6):
+    for rsg in range(2, 6):
         MODEL_VERSION = f'rsg_{rsg}__rsb_{rsb}/'
         main(MODEL_VERSION)

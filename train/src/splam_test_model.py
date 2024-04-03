@@ -222,6 +222,6 @@ def plot_roc_curve(true_y, y_prob, label):
 
 if __name__ == "__main__":
     # Testing Splam model with different sequence length
-    for seq_len in [200, 400, 600, 800]:
+    for seq_len in [40, 100, 200, 400, 600, 800]:
         MODEL_VERSION = f'Splam_{seq_len}'
         main(seq_len, MODEL_VERSION)
