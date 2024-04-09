@@ -7,6 +7,8 @@ import torch
 from torch.optim.lr_scheduler import LambdaLR
 from torch.optim import Optimizer, AdamW
 from torch.nn import CrossEntropyLoss, BCELoss, BatchNorm1d, ModuleList
+# from torch.nn import Module, BatchNorm1d, LazyBatchNorm1d, ReLU, LeakyReLU, Conv1d, LazyConv1d, ModuleList, Softmax, Sigmoid, Flatten, Dropout2d, Linear
+
 import numpy as np
 import re
 import math
@@ -15,7 +17,6 @@ from sklearn.metrics import average_precision_score
 from splam_constant import *
 from SPLAM import *
 
-SEQ_LEN = 800
 # fix random seed
 def same_seeds(seed):
     torch.manual_seed(seed)
@@ -50,17 +51,17 @@ def one_hot_encode_classifier(Xd):
 #######################################
 # This is for Conformer model 
 #######################################
-def create_datapoints(seq, strand):
+def create_datapoints(seq, strand, segment_len):
     # seq = 'N'*(CL_MAX//2) + seq + 'N'*(CL_MAX//2)
     seq = seq.upper().replace('A', '1').replace('C', '2')
     seq = seq.replace('G', '3').replace('T', '4').replace('N', '0').replace('K', '0').replace('R', '0')
-    jn_start = JUNC_START
-    jn_end = JUNC_END
+    jn_start = segment_len//4
+    jn_end = segment_len//4 * 3
     #######################################
     # predicting pb for every bp
     #######################################
     X0 = np.asarray(list(map(int, list(seq))))
-    Y0 = [np.zeros(SEQ_LEN) for t in range(1)]
+    Y0 = [np.zeros(segment_len) for t in range(1)]
     if strand == '+':
         for t in range(1):        
             Y0[t][jn_start] = 2
@@ -190,25 +191,49 @@ def print_threshold_statistics(y_true, y_pred, threshold, TOTAL_TP, TOTAL_FN, TO
     return TOTAL_TP, TOTAL_FN, TOTAL_FP, TOTAL_TN, LCL_TOTAL_TP, LCL_TOTAL_FN, LCL_TOTAL_FP, LCL_TOTAL_TN
 
 
-def get_donor_acceptor_scores(D_YL, A_YL, D_YP, A_YP):
-    return D_YL[:, 200], D_YP[:, 200], A_YL[:, 600], A_YP[:, 600]
+def get_donor_acceptor_scores(D_YL, A_YL, D_YP, A_YP, seq_len):
+    return D_YL[:, seq_len//4], D_YP[:, seq_len//4], A_YL[:, seq_len//4*3], A_YP[:, seq_len//4*3]
 
 
-def get_junc_scores(D_YL, A_YL, D_YP, A_YP, choice):
+def get_junc_scores(D_YL, A_YL, D_YP, A_YP, choice, seq_len):
     if choice == "min":
-        junc_labels = np.minimum(D_YL[:, 200], A_YL[:, 600])
-        junc_scores = np.minimum(D_YP[:, 200], A_YP[:, 600])
+        junc_labels = np.minimum(D_YL[:, seq_len//4], A_YL[:, seq_len//4*3])
+        junc_scores = np.minimum(D_YP[:, seq_len//4], A_YP[:, seq_len//4*3])
     elif choice == "avg":
-        junc_labels = np.minimum(D_YL[:, 200], A_YL[:, 600])
-        junc_scores = np.mean([D_YP[:, 200], A_YP[:, 600]], axis=0)
+        junc_labels = np.minimum(D_YL[:, seq_len//4], A_YL[:, seq_len//4*3])
+        junc_scores = np.mean([D_YP[:, seq_len//4], A_YP[:, seq_len//4*3]], axis=0)
     return junc_labels, junc_scores
 
 
-def print_junc_statistics(D_YL, A_YL, D_YP, A_YP, threshold, TOTAL_TP, TOTAL_FN, TOTAL_FP, TOTAL_TN):
-    label_junc_idx = (D_YL[:, 200]==1) & (A_YL[:, 600]==1)
-    label_nonjunc_idx = (D_YL[:, 200]==0) & (A_YL[:, 600]==0)
-    predict_junc_idx = (D_YP[:, 200]>=threshold) & (A_YP[:, 600]>=threshold)
-    predict_nonjunc_idx = (D_YP[:, 200]<threshold) | (A_YP[:, 600]<threshold)
+def print_splice_site_statistics(YL, YP, threshold, TOTAL_TP, TOTAL_FN, TOTAL_FP, TOTAL_TN, seq_len, choice):
+    if choice == "donor":
+        label_junc_idx = (YL[:, seq_len//4]==1)
+        label_nonjunc_idx = (YL[:, seq_len//4]==0)
+        predict_junc_idx = (YP[:, seq_len//4]>=threshold)
+        predict_nonjunc_idx = (YP[:, seq_len//4]<threshold)
+    elif choice == "acceptor":
+        label_junc_idx = (YL[:, seq_len//4*3]==1)
+        label_nonjunc_idx = (YL[:, seq_len//4*3]==0)
+        predict_junc_idx = (YP[:, seq_len//4*3]>=threshold)
+        predict_nonjunc_idx = (YP[:, seq_len//4*3]<threshold)
+    idx_true = np.nonzero(label_junc_idx == True)[0]
+    idx_pred = np.nonzero(predict_junc_idx == True)[0]
+    LCL_TOTAL_TP = np.size(np.intersect1d(idx_true, idx_pred))
+    LCL_TOTAL_FN = len(idx_true) - LCL_TOTAL_TP
+    LCL_TOTAL_FP = len(idx_pred) - LCL_TOTAL_TP
+    LCL_TOTAL_TN = len(YL) - LCL_TOTAL_TP - LCL_TOTAL_FN - LCL_TOTAL_FP
+    TOTAL_TP += LCL_TOTAL_TP
+    TOTAL_FN += LCL_TOTAL_FN
+    TOTAL_FP += LCL_TOTAL_FP
+    TOTAL_TN += LCL_TOTAL_TN
+    return TOTAL_TP, TOTAL_FN, TOTAL_FP, TOTAL_TN, LCL_TOTAL_TP, LCL_TOTAL_FN, LCL_TOTAL_FP, LCL_TOTAL_TN
+
+
+def print_junc_statistics(D_YL, A_YL, D_YP, A_YP, threshold, TOTAL_TP, TOTAL_FN, TOTAL_FP, TOTAL_TN, seq_len):
+    label_junc_idx = (D_YL[:, seq_len//4]==1) & (A_YL[:, seq_len//4*3]==1)
+    label_nonjunc_idx = (D_YL[:, seq_len//4]==0) & (A_YL[:, seq_len//4*3]==0)
+    predict_junc_idx = (D_YP[:, seq_len//4]>=threshold) & (A_YP[:, seq_len//4*3]>=threshold)
+    predict_nonjunc_idx = (D_YP[:, seq_len//4]<threshold) | (A_YP[:, seq_len//4*3]<threshold)
     idx_true = np.nonzero(label_junc_idx == True)[0]
     idx_pred = np.nonzero(predict_junc_idx == True)[0]
     LCL_TOTAL_TP = np.size(np.intersect1d(idx_true, idx_pred))
