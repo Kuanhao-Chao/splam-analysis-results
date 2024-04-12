@@ -1,4 +1,10 @@
 src_tools_evaluation/
+splam.zip
+splam/
+train/src/archive/
+experiments/archive/
+train/junctions/
+
 # sys
 __pycache__/
 .DS_Store
